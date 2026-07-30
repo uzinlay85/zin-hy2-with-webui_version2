@@ -22,7 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DB_FILE = "database.db"
+DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "database.db")
 HYSTERIA_TRAFFIC_API = "http://127.0.0.1:8080"
 HYSTERIA_SECRET = "" # If you set a secret in config.yaml, put it here
 
