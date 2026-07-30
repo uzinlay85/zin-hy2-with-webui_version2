@@ -337,3 +337,16 @@ systemctl cat hy2-api.service | grep ExecStart
 ```
 
 *(ထို့နောက် Web Panel တွင်လည်း ၎င်း Username/Password အသစ်အတိုင်း ပြောင်းလဲဖြည့်သွင်းပေးရပါမည်)*
+
+---
+
+## 🌐 Web Panel တပ်ဆင်နည်း (Optional)
+
+အကယ်၍ Hysteria 2 အတွက် သီးသန့် Web Panel ကိုပါ တပ်ဆင်အသုံးပြုလိုပါက အောက်ပါ command ကို VPS Terminal တွင် run နိုင်ပါသည် -
+
+```bash
+# Web Panel တပ်ဆင်ရန် Script အား run ခြင်း
+curl -s https://raw.githubusercontent.com/uzinlay85/zin-hy2-with-webui_version2/main/panel_install.sh | sudo bash
+```
+
+*(မှတ်ချက် - ၎င်းသည် Web Panel အတွက် လိုအပ်သော Python environments များကို install လုပ်ပြီး `hy2-panel` service ကို အလိုအလျောက် သတ်မှတ်ပေးမည်ဖြစ်ပါသည်။)*
