@@ -4,7 +4,7 @@ Fast, Secure, and Automated Hysteria 2 VPN Server setup with a feature-rich, mod
 
 ## ✨ အသစ်ပါဝင်လာသော စနစ်များ (Major Features)
 - 🚀 **One-Click Setup:** Code တစ်ကြောင်းတည်း Run ရုံဖြင့် Hysteria 2 + Web Panel + SSL အစုံအလင် တပ်ဆင်ပေးခြင်း။
-- 🌍 **Universal Client Compatibility:** Obfuscation ကို ဖယ်ရှားထားသောကြောင့် **Clash Meta, Sing-box, ShadowRocket, NekoBox, V2rayN, Hiddify** အစရှိသည့် App အားလုံးတွင် အဆင်ပြေချောမွေ့စွာ ချိတ်ဆက်အသုံးပြုနိုင်ပါသည်။
+- 🌍 **Advanced Anti-Censorship (Obfuscation):** Salamander Obfuscation စနစ်ကို အလိုအလျောက် ထည့်သွင်းပေးထားသောကြောင့် တင်းကျပ်သော DPI (ဥပမာ - MPT/Ooredoo) ပိတ်ဆို့မှုများကို အလွယ်တကူ ကျော်ဖြတ်နိုင်ပြီး V2rayN, NekoBox, Sing-box အစရှိသည့် App အားလုံးတွင် ချိတ်ဆက်အသုံးပြုနိုင်ပါသည်။
 - 🎨 **Modern Responsive UI:** သပ်ရပ်လှပသော UI အသစ်။ (List View နှင့် Card View ကို စိတ်ကြိုက် ပြောင်းလဲကြည့်ရှုနိုင်ပြီး Mobile screen များတွင်ပါ အဆင်ပြေစေပါသည်။)
 - 🟢 **Real-Time Online Status:** လက်ရှိချိတ်ဆက်အသုံးပြုနေသော User များကို **Live** အနေဖြင့် (Pulsing Green Dot & Connection Count) တိုက်ရိုက် ကြည့်ရှုနိုင်ခြင်း။
 - ⏱️ **Last Seen Tracking:** Offline ဖြစ်သွားသော User များ နောက်ဆုံးချိတ်ဆက်ခဲ့သည့်အချိန် (ဥပမာ - *Last seen: 5m ago*) ကို ပြသပေးခြင်း။
@@ -30,8 +30,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/uzinlay85/zin-hy2-with-webui
 **တပ်ဆင်ပြီးပါက Web Panel သို့ ဝင်ရောက်ရန်:**
 - **URL:** `https://yourdomain.com/hy2-api/`
 - **Username:** `admin`
-- **Password:** `admin123`
-*(မှတ်ချက်။ ပထမဆုံး Login ဝင်ပြီးပါက ညာဘက်အပေါ်ထောင့်ရှိ "⚙️ Settings" တွင် Password အသစ် ချက်ချင်း ပြောင်းလဲအသုံးပြုပါ။)*
+- **Password:** `Install လုပ်စဉ်က သင်ပေးခဲ့သော Password (သို့မဟုတ်) Terminal တွင် ပြသသွားသော အလိုအလျောက်ထုတ်ပေးသည့် Password`
+*(မှတ်ချက်။ Login ဝင်ပြီးပါက ညာဘက်အပေါ်ထောင့်ရှိ "⚙️ Settings" တွင် Password ကို အချိန်မရွေး ပြောင်းလဲအသုံးပြုနိုင်ပါသည်။)*
 
 ---
 
@@ -46,7 +46,7 @@ systemctl restart hy2-panel.service
 ```
 Update လုပ်ပြီးပါက Browser တွင် **`Ctrl + Shift + R`** (Hard Refresh) နှိပ်၍ အသုံးပြုပါ။
 
-*(မှတ်ချက်: အကယ်၍ ယခင် Obfuscation ဖြင့် တပ်ဆင်ထားသော ဗားရှင်းအဟောင်းကို အသုံးပြုနေပါက Universal App Support ရရှိရန် `bash fix_config.sh` ကိုပါ run ပေးရန် လိုအပ်ပါသည်။)*
+*(မှတ်ချက်: System Update အသစ်များ ပါလာပါက Install script အသစ်အတိုင်း Database Backup ယူပြီး ပြန်လည် Install ပြုလုပ်ရန် အကြံပြုပါသည်။)*
 
 ---
 
