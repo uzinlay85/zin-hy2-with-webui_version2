@@ -9,6 +9,9 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+# Go to root directory to prevent getcwd errors if the script is run from a deleted directory
+cd /root || exit
+
 # 1. Ask for Domain
 read -p "Enter your Domain Name (e.g., vpn.yourdomain.com): " DOMAIN
 if [ -z "$DOMAIN" ]; then
@@ -21,7 +24,7 @@ apt-get update
 apt-get install -y curl wget nginx certbot python3 python3-venv python3-pip sqlite3
 
 echo -e "\n[2/6] Installing Hysteria 2 Core..."
-bash <(curl -fsSL https://app.hysteria.network/app/install-server.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/apernet/hysteria/main/install-server.sh)
 
 echo -e "\n[3/6] Generating SSL Certificate (Let's Encrypt)..."
 systemctl stop nginx
