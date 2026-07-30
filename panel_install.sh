@@ -16,14 +16,21 @@ apt-get install -y python3 python3-venv python3-pip
 echo -e "\n[2/4] Setting up Python Environment..."
 cd /opt
 if [ -d "hy2-panel" ]; then
-    echo "Updating existing panel..."
-    cd hy2-panel
-    git pull
+    if [ ! -d "hy2-panel/.git" ]; then
+        echo "Found broken installation. Reinstalling..."
+        rm -rf hy2-panel
+        git clone https://github.com/uzinlay85/zin-hy2-with-webui_version2.git /opt/hy2-panel
+        cd hy2-panel
+    else
+        echo "Updating existing panel..."
+        cd hy2-panel
+        git pull
+    fi
 else
     echo "Downloading panel..."
     # Since users run this script via curl, we need to clone the repository
     git clone https://github.com/uzinlay85/zin-hy2-with-webui_version2.git /opt/hy2-panel
-    cd /opt/hy2-panel
+    cd hy2-panel
 fi
 
 python3 -m venv venv
