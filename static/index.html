@@ -183,6 +183,9 @@
                     <td class="px-6 py-4">${u.device_limit > 0 ? u.device_limit : 'Unlimited'}</td>
                     <td class="px-6 py-4">${statusBadge}</td>
                     <td class="px-6 py-4 text-right">
+                        <button onclick="copyLink(${u.id})" class="text-purple-400 hover:text-purple-300 mr-3 text-sm transition" title="Copy Hysteria2 Link">
+                            Copy Link
+                        </button>
                         <button onclick="resetData(${u.id})" class="text-emerald-400 hover:text-emerald-300 mr-3 text-sm transition" title="Reset Used Data">
                             Reset Data
                         </button>
@@ -235,6 +238,18 @@
             }
             
             document.getElementById('userModal').classList.add('active');
+        }
+
+        function copyLink(id) {
+            const u = usersList.find(x => x.id === id);
+            if(!u) return;
+            const domain = window.location.hostname;
+            const link = `hysteria2://${u.username}:${u.password}@${domain}:443/?sni=${domain}&alpn=h3&insecure=0#${u.username}`;
+            navigator.clipboard.writeText(link).then(() => {
+                alert("Link copied to clipboard!");
+            }).catch(err => {
+                prompt("Copy this link:", link);
+            });
         }
 
         async function saveUser(e) {
