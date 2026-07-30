@@ -390,7 +390,7 @@
             const u = usersList.find(x => x.id === id);
             if(!u) return;
             const domain = window.location.hostname;
-            const link = `hysteria2://${u.username}:${u.password}@${domain}:443/?sni=${domain}&insecure=0&mport=20000-50000&obfs=salamander&obfs-password=zin-super-obfs#${u.username}`;
+            const link = `hysteria2://${u.username}:${u.password}@${domain}:443?security=tls&fm=%7B%22quicParams%22%3A%7B%22udpHop%22%3A%7B%22ports%22%3A%2220000-50000%22%7D%7D%7D&mport=20000-50000&sni=${domain}#${u.username}`;
             navigator.clipboard.writeText(link).then(() => {
                 alert("Link copied to clipboard!");
             }).catch(err => {

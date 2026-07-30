@@ -75,11 +75,6 @@ tls:
   cert: /etc/letsencrypt/live/$DOMAIN/fullchain.pem
   key: /etc/letsencrypt/live/$DOMAIN/privkey.pem
 
-obfs:
-  type: salamander
-  salamander:
-    password: "zin-super-obfs"
-
 auth:
   type: http
   http:
