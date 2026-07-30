@@ -24,7 +24,29 @@ apt-get update
 apt-get install -y curl wget nginx certbot python3 python3-venv python3-pip sqlite3
 
 echo -e "\n[2/6] Installing Hysteria 2 Core..."
-bash <(curl -fsSL https://raw.githubusercontent.com/apernet/hysteria/main/install-server.sh)
+# Download directly from GitHub to bypass app.hysteria.network DNS issues
+wget -qO /usr/local/bin/hysteria https://github.com/apernet/hysteria/releases/latest/download/hysteria-linux-amd64
+chmod +x /usr/local/bin/hysteria
+
+# Create hysteria user
+useradd -r -M -s /usr/sbin/nologin hysteria 2>/dev/null || true
+
+# Set up systemd service
+cat << EOF_HY2_SERVICE > /etc/systemd/system/hysteria-server.service
+[Unit]
+Description=Hysteria 2 Server
+After=network.target
+
+[Service]
+Type=simple
+User=hysteria
+WorkingDirectory=/etc/hysteria
+ExecStart=/usr/local/bin/hysteria server --config /etc/hysteria/config.yaml
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF_HY2_SERVICE
 
 echo -e "\n[3/6] Generating SSL Certificate (Let's Encrypt)..."
 systemctl stop nginx
