@@ -217,8 +217,10 @@ def update_user(user_id: int, user: UserCreate, admin: str = Depends(get_current
     
     return {"success": True}
 
+from fastapi import BackgroundTasks
+
 @app.delete("/api/users/{user_id}")
-def delete_user(user_id: int, admin: str = Depends(get_current_admin)):
+def delete_user(user_id: int, background_tasks: BackgroundTasks, admin: str = Depends(get_current_admin)):
     conn = get_db()
     c = conn.cursor()
     c.execute("SELECT username FROM users WHERE id=? AND role != 'admin'", (user_id,))
@@ -228,7 +230,7 @@ def delete_user(user_id: int, admin: str = Depends(get_current_admin)):
         c.execute("DELETE FROM users WHERE id=?", (user_id,))
         conn.commit()
         # Kick the user immediately
-        asyncio.create_task(kick_user(username))
+        background_tasks.add_task(kick_user, username)
     conn.close()
     return {"success": True}
     
