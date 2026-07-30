@@ -19,19 +19,31 @@ if [ -z "$DOMAIN" ]; then
     exit 1
 fi
 
+read -p "Enter Admin Password for Web Panel (leave blank for random): " ADMIN_PASS
+if [ -z "$ADMIN_PASS" ]; then
+    ADMIN_PASS=$(head -c 12 /dev/urandom | base64)
+fi
+
+read -p "Enter Salamander Obfuscation Password (leave blank for random): " OBFS_PASS
+if [ -z "$OBFS_PASS" ]; then
+    OBFS_PASS=$(head -c 12 /dev/urandom | base64)
+fi
+
 echo -e "\n[1/7] Installing System Dependencies..."
 apt-get update
 apt-get install -y curl wget nginx certbot python3 python3-venv python3-pip sqlite3 ufw
 
 echo -e "\n[2/7] Optimizing Network (BBR & Sysctl) & Firewall..."
 # Enable BBR and optimize network for VPN
-cat << EOF_SYSCTL >> /etc/sysctl.conf
+if ! grep -q "net.core.default_qdisc=fq" /etc/sysctl.conf; then
+    cat << EOF_SYSCTL >> /etc/sysctl.conf
 net.core.default_qdisc=fq
 net.ipv4.tcp_congestion_control=bbr
 net.ipv4.ip_forward=1
 net.ipv4.tcp_fastopen=3
 EOF_SYSCTL
-sysctl -p
+    sysctl -p
+fi
 
 # Setup UFW Firewall Ports
 ufw allow 80/tcp
@@ -47,14 +59,23 @@ ufw deny out 587/tcp
 echo -e "\n[3/7] Configuring UDP Port Hopping (UFW NAT)..."
 # Add NAT rules to UFW before.rules for port hopping
 if ! grep -q "20000:50000 -j REDIRECT" /etc/ufw/before.rules; then
-    sed -i '1s/^/*nat\n:PREROUTING ACCEPT [0:0]\n-A PREROUTING -p udp --dport 20000:50000 -j REDIRECT --to-port 443\nCOMMIT\n\n/' /etc/ufw/before.rules
+    sed -i '/^\*filter/i *nat\n:PREROUTING ACCEPT [0:0]\n-A PREROUTING -p udp --dport 20000:50000 -j REDIRECT --to-port 443\nCOMMIT\n' /etc/ufw/before.rules
 fi
 ufw --force enable
 ufw reload
 
 echo -e "\n[4/7] Installing Hysteria 2 Core..."
 # Download directly from GitHub to bypass app.hysteria.network DNS issues
-wget -qO /usr/local/bin/hysteria https://github.com/apernet/hysteria/releases/latest/download/hysteria-linux-amd64
+ARCH=$(uname -m)
+if [ "$ARCH" = "x86_64" ]; then
+    HY2_ARCH="amd64"
+elif [ "$ARCH" = "aarch64" ]; then
+    HY2_ARCH="arm64"
+else
+    echo "Unsupported architecture: $ARCH"
+    exit 1
+fi
+wget -qO /usr/local/bin/hysteria https://github.com/apernet/hysteria/releases/latest/download/hysteria-linux-${HY2_ARCH}
 chmod +x /usr/local/bin/hysteria
 
 # Set up systemd service
@@ -110,6 +131,11 @@ masquerade:
     url: https://bing.com/
     rewriteHost: true
 
+obfs:
+  type: salamander
+  salamander:
+    password: "$OBFS_PASS"
+
 acl:
   inline:
     - reject(all, udp/443)
@@ -125,6 +151,10 @@ if [ -d "hy2-panel" ]; then
 fi
 git clone https://github.com/uzinlay85/zin-hy2-with-webui_version2.git /opt/hy2-panel
 cd /opt/hy2-panel
+
+# Inject generated passwords into Panel code
+sed -i "s/ADMIN_PASSWORD_PLACEHOLDER/$ADMIN_PASS/g" /opt/hy2-panel/main.py
+sed -i "s/OBFS_PASSWORD_PLACEHOLDER/$OBFS_PASS/g" /opt/hy2-panel/static/index.html
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -195,6 +225,7 @@ echo "✅ Installation Completed Successfully!"
 echo "========================================================"
 echo "Web Panel URL: https://$DOMAIN/hy2-api/"
 echo "Admin Login  : admin"
-echo "Password     : admin123"
+echo "Password     : $ADMIN_PASS"
+echo "OBFS Password: $OBFS_PASS"
 echo "========================================================"
 echo "မှတ်ချက်။ ။ ပထမဆုံး Login ဝင်ပြီးပါက Admin Settings တွင် Password အသစ် ပြောင်းလဲပါ။"
