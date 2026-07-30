@@ -29,6 +29,30 @@
 </head>
 <body class="min-h-screen antialiased text-gray-200">
 
+    <!-- Login Modal -->
+    <div id="loginOverlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#0f172a]">
+        <div class="glass w-full max-w-sm rounded-2xl p-8 shadow-2xl text-center">
+            <h2 class="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">Admin Login</h2>
+            <p class="text-sm text-gray-400 mb-8">Enter your credentials to manage Hysteria 2</p>
+            <form id="loginForm" onsubmit="doLogin(event)">
+                <div class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Username</label>
+                        <input type="text" id="loginUsername" required class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Password</label>
+                        <input type="password" id="loginPassword" required class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
+                    </div>
+                </div>
+                <button type="submit" id="loginBtn" class="mt-8 w-full bg-primary hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-medium transition shadow-lg shadow-blue-500/30">
+                    Sign In
+                </button>
+                <p id="loginError" class="mt-4 text-red-400 text-sm hidden">Invalid username or password</p>
+            </form>
+        </div>
+    </div>
+
     <div class="container mx-auto px-4 py-8 max-w-6xl">
         <header class="flex justify-between items-center mb-8">
             <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
@@ -123,9 +147,69 @@
             return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
         }
 
-        async function fetchUsers() {
+        let authHeader = sessionStorage.getItem('hy2_auth');
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            if(authHeader) {
+                document.getElementById('loginOverlay').style.display = 'none';
+                fetchUsers();
+            } else {
+                document.getElementById('loginOverlay').style.display = 'flex';
+            }
+        });
+
+        async function doLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('loginUsername').value;
+            const p = document.getElementById('loginPassword').value;
+            const btn = document.getElementById('loginBtn');
+            const err = document.getElementById('loginError');
+            
+            btn.innerText = "Signing In...";
+            btn.disabled = true;
+            err.classList.add('hidden');
+            
+            const token = 'Basic ' + btoa(u + ':' + p);
+            
             try {
-                const res = await fetch(API_URL);
+                const res = await fetch('api/login', {
+                    method: 'POST',
+                    headers: { 'Authorization': token }
+                });
+                
+                if(res.ok) {
+                    sessionStorage.setItem('hy2_auth', token);
+                    authHeader = token;
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    fetchUsers();
+                } else {
+                    err.classList.remove('hidden');
+                }
+            } catch(e) {
+                err.innerText = "Connection failed";
+                err.classList.remove('hidden');
+            }
+            btn.innerText = "Sign In";
+            btn.disabled = false;
+        }
+
+        async function apiFetch(url, options = {}) {
+            if(!options.headers) options.headers = {};
+            if(authHeader) options.headers['Authorization'] = authHeader;
+            const res = await fetch(url, options);
+            if(res.status === 401) {
+                sessionStorage.removeItem('hy2_auth');
+                authHeader = null;
+                document.getElementById('loginOverlay').style.display = 'flex';
+                throw new Error("Unauthorized");
+            }
+            return res;
+        }
+
+        async function fetchUsers() {
+            if(!authHeader) return;
+            try {
+                const res = await apiFetch(API_URL);
                 const data = await res.json();
                 usersList = data.users;
                 renderUsers();
@@ -272,7 +356,7 @@
                 const method = id ? 'PUT' : 'POST';
                 const url = id ? `${API_URL}/${id}` : API_URL;
                 
-                const res = await fetch(url, {
+                const res = await apiFetch(url, {
                     method,
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(payload)
@@ -294,7 +378,7 @@
         async function deleteUser(id) {
             if(!confirm("Are you sure you want to delete this user?")) return;
             try {
-                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                await apiFetch(`${API_URL}/${id}`, { method: 'DELETE' });
                 fetchUsers();
             } catch(err) {
                 console.error(err);
@@ -304,7 +388,7 @@
         async function resetData(id) {
             if(!confirm("Are you sure you want to reset the used data to 0?")) return;
             try {
-                await fetch(`${API_URL}/${id}/reset_data`, { method: 'POST' });
+                await apiFetch(`${API_URL}/${id}/reset_data`, { method: 'POST' });
                 fetchUsers();
             } catch(err) {
                 console.error(err);
@@ -312,7 +396,7 @@
         }
 
         // Initialize
-        fetchUsers();
+        // fetchUsers(); is called after login or page load
         // Poll every 10 seconds for live updates
         setInterval(fetchUsers, 10000);
     </script>

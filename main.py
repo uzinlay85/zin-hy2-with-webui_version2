@@ -2,7 +2,8 @@ import sqlite3
 import datetime
 import asyncio
 import httpx
-from fastapi import FastAPI, Request, HTTPException, Depends
+from fastapi import FastAPI, Request, HTTPException, Depends, status
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,6 +12,7 @@ import os
 import secrets
 
 app = FastAPI(title="Hysteria 2 Panel API")
+security = HTTPBasic()
 
 # Allow CORS for development
 app.add_middleware(
@@ -68,6 +70,23 @@ class UserCreate(BaseModel):
     expire_date: str = ""
     device_limit: int = 0
     is_active: bool = True
+
+def get_current_admin(credentials: HTTPBasicCredentials = Depends(security)):
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE username = ? AND role = 'admin'", (credentials.username,))
+    admin = c.fetchone()
+    conn.close()
+    if not admin or admin["password"] != credentials.password:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password"
+        )
+    return admin["username"]
+
+@app.post("/api/login")
+def login(admin: str = Depends(get_current_admin)):
+    return {"success": True, "admin": admin}
 
 # --- Hysteria 2 Authentication Endpoint ---
 @app.post("/auth")
@@ -143,7 +162,7 @@ async def hysteria_auth(request: Request):
 # --- Management API (For Web Panel) ---
 
 @app.get("/api/users")
-def get_users():
+def get_users(admin: str = Depends(get_current_admin)):
     conn = get_db()
     c = conn.cursor()
     c.execute("SELECT id, username, password, data_limit_gb, data_used_bytes, expire_date, device_limit, is_active, role FROM users WHERE role != 'admin'")
@@ -152,7 +171,7 @@ def get_users():
     return {"users": users}
 
 @app.post("/api/users")
-def add_user(user: UserCreate):
+def add_user(user: UserCreate, admin: str = Depends(get_current_admin)):
     conn = get_db()
     c = conn.cursor()
     try:
@@ -168,7 +187,7 @@ def add_user(user: UserCreate):
     return {"success": True}
 
 @app.put("/api/users/{user_id}")
-def update_user(user_id: int, user: UserCreate):
+def update_user(user_id: int, user: UserCreate, admin: str = Depends(get_current_admin)):
     conn = get_db()
     c = conn.cursor()
     c.execute("""
@@ -181,7 +200,7 @@ def update_user(user_id: int, user: UserCreate):
     return {"success": True}
 
 @app.delete("/api/users/{user_id}")
-def delete_user(user_id: int):
+def delete_user(user_id: int, admin: str = Depends(get_current_admin)):
     conn = get_db()
     c = conn.cursor()
     c.execute("SELECT username FROM users WHERE id=? AND role != 'admin'", (user_id,))
@@ -196,7 +215,7 @@ def delete_user(user_id: int):
     return {"success": True}
     
 @app.post("/api/users/{user_id}/reset_data")
-def reset_user_data(user_id: int):
+def reset_user_data(user_id: int, admin: str = Depends(get_current_admin)):
     conn = get_db()
     c = conn.cursor()
     c.execute("UPDATE users SET data_used_bytes=0 WHERE id=? AND role != 'admin'", (user_id,))
