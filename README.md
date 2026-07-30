@@ -28,7 +28,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/uzinlay85/zin-hy2-with-webui
 3. ကျန်သည့် Hysteria 2 တပ်ဆင်ခြင်း၊ SSL ယူခြင်း၊ Nginx ချိန်ခြင်း အစရှိသည်တို့အားလုံးကို Script မှ အလိုအလျောက် ၅ မိနစ်အတွင်း အပြီးသတ်ပေးသွားမည် ဖြစ်သည်။
 
 **တပ်ဆင်ပြီးပါက Web Panel သို့ ဝင်ရောက်ရန်:**
-- **URL:** `https://yourdomain.com`
+- **URL:** `https://yourdomain.com/hy2-api/`
 - **Username:** `admin`
 - **Password:** `admin123`
 *(မှတ်ချက်။ ပထမဆုံး Login ဝင်ပြီးပါက ညာဘက်အပေါ်ထောင့်ရှိ "⚙️ Settings" တွင် Password အသစ် ချက်ချင်း ပြောင်းလဲအသုံးပြုပါ။)*
