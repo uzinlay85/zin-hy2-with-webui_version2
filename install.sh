@@ -136,9 +136,6 @@ obfs:
   salamander:
     password: "$OBFS_PASS"
 
-acl:
-  inline:
-    - reject(all, udp/443)
 
 trafficStats:
   listen: 127.0.0.1:8080
