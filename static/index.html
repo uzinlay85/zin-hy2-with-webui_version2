@@ -1,478 +1,807 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hysteria 2 Panel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        dark: '#0f172a',
-                        card: '#1e293b',
-                        primary: '#3b82f6',
-                    }
-                }
-            }
-        }
-    </script>
+    <meta name="description" content="Hysteria 2 VPN Web Management Panel">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .modal { display: none; }
-        .modal.active { display: flex; }
-    </style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body class="min-h-screen antialiased text-gray-200">
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <!-- Login Modal -->
-    <div id="loginOverlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#0f172a]">
-        <div class="glass w-full max-w-sm rounded-2xl p-8 shadow-2xl text-center">
-            <h2 class="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">Admin Login</h2>
-            <p class="text-sm text-gray-400 mb-8">Enter your credentials to manage Hysteria 2</p>
-            <form id="loginForm" onsubmit="doLogin(event)">
-                <div class="space-y-4 text-left">
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">Username</label>
-                        <input type="text" id="loginUsername" required class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">Password</label>
-                        <input type="password" id="loginPassword" required class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
-                    </div>
-                </div>
-                <button type="submit" id="loginBtn" class="mt-8 w-full bg-primary hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-medium transition shadow-lg shadow-blue-500/30">
-                    Sign In
-                </button>
-                <p id="loginError" class="mt-4 text-red-400 text-sm hidden">Invalid username or password</p>
-            </form>
-        </div>
-    </div>
-
-    <div class="container mx-auto px-4 py-8 max-w-6xl">
-        <header class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
-                Hysteria 2 Web Panel
-            </h1>
-            <div class="flex gap-4">
-                <button onclick="doLogout()" class="bg-red-700 hover:bg-red-600 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg">
-                    Logout
-                </button>
-                <button onclick="openAdminModal()" class="bg-gray-700 hover:bg-gray-600 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg">
-                    Admin Settings
-                </button>
-                <button onclick="openModal()" class="bg-primary hover:bg-blue-600 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg shadow-blue-500/30">
-                    + Add User
-                </button>
-            </div>
-        </header>
-
-        <div class="glass rounded-2xl overflow-hidden shadow-2xl">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm whitespace-nowrap">
-                    <thead class="uppercase tracking-wider border-b border-gray-700 bg-gray-800/50 text-gray-400 text-xs">
-                        <tr>
-                            <th class="px-6 py-4 font-medium">Username</th>
-                            <th class="px-6 py-4 font-medium">Password</th>
-                            <th class="px-6 py-4 font-medium">Data Limit</th>
-                            <th class="px-6 py-4 font-medium">Used Data</th>
-                            <th class="px-6 py-4 font-medium">Expire Date</th>
-                            <th class="px-6 py-4 font-medium">Devices</th>
-                            <th class="px-6 py-4 font-medium">Status</th>
-                            <th class="px-6 py-4 font-medium text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTableBody" class="divide-y divide-gray-700/50">
-                        <!-- Rows will be populated by JS -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- User Modal -->
-    <div id="userModal" class="modal fixed inset-0 z-50 items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-        <div class="glass w-full max-w-md rounded-2xl p-6 shadow-2xl transform transition-all">
-            <h2 id="modalTitle" class="text-2xl font-bold mb-6">Add New User</h2>
-            <form id="userForm" onsubmit="saveUser(event)">
-                <input type="hidden" id="userId">
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">Username (Client ID)</label>
-                        <input type="text" id="username" required class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">Password</label>
-                        <input type="text" id="password" required class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
-                    </div>
-                    
-                    <div class="flex gap-4">
-                        <div class="w-1/2">
-                            <label class="block text-sm text-gray-400 mb-1">Data Limit (GB)</label>
-                            <input type="number" step="0.1" id="dataLimit" placeholder="0 = Unlimited" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
-                        </div>
-                        <div class="w-1/2">
-                            <label class="block text-sm text-gray-400 mb-1">Max Devices</label>
-                            <input type="number" id="deviceLimit" placeholder="0 = Unlimited" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">Expire Date</label>
-                        <input type="date" id="expireDate" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary" style="color-scheme: dark;">
-                    </div>
-                    
-                    <div class="flex items-center mt-4">
-                        <input type="checkbox" id="isActive" checked class="w-4 h-4 text-primary bg-gray-800 border-gray-600 rounded focus:ring-primary focus:ring-2">
-                        <label class="ml-2 text-sm text-gray-400">Account Active</label>
-                    </div>
-                </div>
-                
-                <div class="mt-8 flex justify-end gap-3">
-                    <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition">Cancel</button>
-                    <button type="submit" class="bg-primary hover:bg-blue-600 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg shadow-blue-500/30">Save User</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Admin Settings Modal -->
-    <div id="adminModal" class="modal fixed inset-0 z-50 items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-        <div class="glass w-full max-w-sm rounded-2xl p-6 shadow-2xl transform transition-all">
-            <h2 class="text-2xl font-bold mb-6">Admin Settings</h2>
-            <form id="adminForm" onsubmit="updateAdmin(event)">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">New Username</label>
-                        <input type="text" id="newAdminUser" required class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">New Password</label>
-                        <input type="password" id="newAdminPass" required class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
-                    </div>
-                </div>
-                
-                <div class="mt-8 flex justify-end gap-3">
-                    <button type="button" onclick="closeAdminModal()" class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition">Cancel</button>
-                    <button type="submit" class="bg-primary hover:bg-blue-600 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg shadow-blue-500/30">Save Changes</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        const API_URL = 'api/users'; // relative path to work behind reverse proxy
-        let usersList = [];
-
-        function formatBytes(bytes, decimals = 2) {
-            if (!+bytes) return '0 Bytes';
-            const k = 1024;
-            const dm = decimals < 0 ? 0 : decimals;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+        :root {
+            --bg:        #080c14;
+            --surface:   #0f1623;
+            --card:      #131c2e;
+            --card-hover:#172035;
+            --border:    rgba(255,255,255,0.07);
+            --border2:   rgba(255,255,255,0.12);
+            --text:      #e2e8f0;
+            --muted:     #64748b;
+            --primary:   #3b82f6;
+            --primary-g: linear-gradient(135deg,#3b82f6,#6366f1);
+            --green:     #10b981;
+            --red:       #ef4444;
+            --orange:    #f59e0b;
+            --purple:    #a855f7;
         }
 
-        let authHeader = sessionStorage.getItem('hy2_auth');
-        
-        document.addEventListener("DOMContentLoaded", () => {
-            if(authHeader) {
+        html, body { height: 100%; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+
+        /* ── Layout ── */
+        .layout { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+        /* ── Login Overlay ── */
+        #loginOverlay {
+            position: fixed; inset: 0; z-index: 200;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--bg);
+        }
+        .login-card {
+            background: var(--card);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            padding: 40px 36px;
+            width: 100%; max-width: 380px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+        }
+        .login-logo {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .login-logo .icon {
+            width: 56px; height: 56px;
+            background: var(--primary-g);
+            border-radius: 16px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 26px;
+            margin-bottom: 14px;
+            box-shadow: 0 8px 24px rgba(59,130,246,0.35);
+        }
+        .login-logo h1 { font-size: 22px; font-weight: 700; }
+        .login-logo p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .form-control {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        .form-control:focus { border-color: var(--primary); }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 14px; font-weight: 600; font-family: inherit;
+            cursor: pointer; border: none; transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-primary { background: var(--primary-g); color: #fff; box-shadow: 0 4px 14px rgba(59,130,246,0.35); }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(59,130,246,0.45); }
+        .btn-ghost { background: var(--surface); color: var(--text); border: 1px solid var(--border2); }
+        .btn-ghost:hover { background: var(--card-hover); border-color: var(--border2); }
+        .btn-danger { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.25); }
+        .btn-danger:hover { background: rgba(239,68,68,0.25); }
+        .btn-full { width: 100%; }
+
+        /* ── Header ── */
+        .header {
+            background: rgba(15,22,35,0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 50;
+            padding: 0 20px;
+        }
+        .header-inner {
+            max-width: 1100px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 62px; gap: 12px;
+        }
+        .header-brand { display: flex; align-items: center; gap: 10px; }
+        .header-brand .dot {
+            width: 34px; height: 34px;
+            background: var(--primary-g);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+        }
+        .header-brand h1 { font-size: 17px; font-weight: 700; }
+        .header-actions { display: flex; align-items: center; gap: 8px; }
+
+        /* ── Main ── */
+        .main { padding: 28px 20px; max-width: 1100px; margin: 0 auto; }
+
+        /* ── Stats ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            display: flex; align-items: center; gap: 14px;
+        }
+        .stat-icon {
+            width: 42px; height: 42px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; flex-shrink: 0;
+        }
+        .stat-icon.blue { background: rgba(59,130,246,0.12); }
+        .stat-icon.green { background: rgba(16,185,129,0.12); }
+        .stat-icon.red { background: rgba(239,68,68,0.12); }
+        .stat-icon.purple { background: rgba(168,85,247,0.12); }
+        .stat-label { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+        .stat-value { font-size: 22px; font-weight: 700; line-height: 1.2; margin-top: 2px; }
+
+        /* ── Toolbar ── */
+        .toolbar {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .toolbar-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 200px; }
+        .search-wrap { position: relative; flex: 1; max-width: 300px; }
+        .search-wrap input {
+            width: 100%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 12px 8px 36px;
+            color: var(--text); font-size: 13px; font-family: inherit;
+            outline: none; transition: border-color 0.2s;
+        }
+        .search-wrap input:focus { border-color: var(--primary); }
+        .search-icon {
+            position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+            color: var(--muted); font-size: 15px; pointer-events: none;
+        }
+        .user-count { color: var(--muted); font-size: 13px; }
+
+        /* ── User Cards ── */
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 14px;
+        }
+        .user-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+        }
+        .user-card:hover {
+            border-color: var(--border2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .user-card-top {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .user-info { flex: 1; min-width: 0; }
+        .user-name {
+            font-size: 15px; font-weight: 600;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin-bottom: 3px;
+        }
+        .user-pass {
+            font-size: 12px; color: var(--muted);
+            font-family: 'Courier New', monospace;
+            background: var(--surface);
+            padding: 2px 7px; border-radius: 5px;
+            display: inline-block;
+        }
+
+        .badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 11px; font-weight: 600; flex-shrink: 0;
+        }
+        .badge-green { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.25); }
+        .badge-red { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.25); }
+        .badge-orange { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); }
+
+        /* ── Data Usage ── */
+        .data-row {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 12px; margin-bottom: 6px;
+        }
+        .data-label { color: var(--muted); }
+        .data-value { font-weight: 500; }
+        .progress-bar {
+            width: 100%; height: 5px;
+            background: var(--surface);
+            border-radius: 10px; overflow: hidden;
+            margin-bottom: 14px;
+        }
+        .progress-fill {
+            height: 100%; border-radius: 10px;
+            background: var(--primary-g);
+            transition: width 0.4s ease;
+        }
+        .progress-fill.danger { background: linear-gradient(90deg,#f59e0b,#ef4444); }
+
+        /* ── Meta ── */
+        .meta-row {
+            display: flex; gap: 14px; margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .meta-item {
+            display: flex; align-items: center; gap: 5px;
+            font-size: 12px; color: var(--muted);
+        }
+        .meta-item span { color: var(--text); font-weight: 500; }
+
+        /* ── Card Actions ── */
+        .card-actions {
+            display: flex; gap: 8px;
+            border-top: 1px solid var(--border);
+            padding-top: 14px;
+        }
+        .action-btn {
+            flex: 1;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+            padding: 8px 6px;
+            border-radius: 9px;
+            font-size: 12px; font-weight: 500; font-family: inherit;
+            cursor: pointer; border: none; transition: all 0.18s;
+        }
+        .action-btn.copy   { background: rgba(168,85,247,0.12); color: #a855f7; }
+        .action-btn.copy:hover { background: rgba(168,85,247,0.22); }
+        .action-btn.reset  { background: rgba(16,185,129,0.10); color: #10b981; }
+        .action-btn.reset:hover { background: rgba(16,185,129,0.2); }
+        .action-btn.edit   { background: rgba(59,130,246,0.10); color: #60a5fa; }
+        .action-btn.edit:hover { background: rgba(59,130,246,0.2); }
+        .action-btn.del    { background: rgba(239,68,68,0.10); color: #ef4444; }
+        .action-btn.del:hover { background: rgba(239,68,68,0.2); }
+
+        /* ── Empty State ── */
+        .empty-state {
+            text-align: center; padding: 60px 20px;
+            color: var(--muted);
+            grid-column: 1/-1;
+        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 14px; }
+        .empty-state p { font-size: 15px; }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(6px);
+            align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--card);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            padding: 28px;
+            width: 100%; max-width: 420px;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.5);
+            animation: slideUp 0.2s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+        .modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 22px;
+        }
+        .modal-title { font-size: 18px; font-weight: 700; }
+        .modal-close {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: var(--surface); border: none; cursor: pointer;
+            color: var(--muted); font-size: 18px;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .modal-close:hover { background: var(--card-hover); color: var(--text); }
+        .modal-footer {
+            display: flex; gap: 10px; justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .form-row { display: flex; gap: 12px; }
+        .form-row .form-group { flex: 1; }
+        .form-group label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .form-control { color-scheme: dark; }
+        .checkbox-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+        .checkbox-row input { width: 16px; height: 16px; accent-color: var(--primary); }
+        .checkbox-row label { font-size: 13px; color: var(--muted); text-transform: none; letter-spacing: normal; }
+
+        /* ── Toast ── */
+        #toast {
+            position: fixed; bottom: 24px; right: 24px; z-index: 999;
+            background: #1e293b; border: 1px solid var(--border2);
+            color: var(--text); padding: 12px 18px; border-radius: 12px;
+            font-size: 13px; font-weight: 500;
+            display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            transform: translateY(80px); opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        #toast.show { transform: none; opacity: 1; }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .header-brand h1 { font-size: 15px; }
+            .btn span { display: none; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .users-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Toast -->
+<div id="toast">✅ <span id="toastMsg">Done</span></div>
+
+<!-- Login Overlay -->
+<div id="loginOverlay">
+    <div class="login-card">
+        <div class="login-logo">
+            <div class="icon">🚀</div>
+            <h1>Hysteria 2 Panel</h1>
+            <p>Sign in to manage your VPN users</p>
+        </div>
+        <form id="loginForm" onsubmit="doLogin(event)">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="loginUsername" class="form-control" required autocomplete="username" placeholder="admin">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password" placeholder="••••••••">
+            </div>
+            <p id="loginError" style="color:#ef4444;font-size:13px;margin-bottom:12px;display:none;">❌ Invalid username or password</p>
+            <button type="submit" id="loginBtn" class="btn btn-primary btn-full">Sign In</button>
+        </form>
+    </div>
+</div>
+
+<!-- Header -->
+<header class="header">
+    <div class="header-inner">
+        <div class="header-brand">
+            <div class="dot">⚡</div>
+            <h1>Hysteria 2 Panel</h1>
+        </div>
+        <div class="header-actions">
+            <button onclick="openAdminModal()" class="btn btn-ghost" id="adminSettingsBtn">
+                <span>⚙️</span><span>Settings</span>
+            </button>
+            <button onclick="openModal()" class="btn btn-primary" id="addUserBtn">
+                <span>+</span><span>Add User</span>
+            </button>
+            <button onclick="doLogout()" class="btn btn-danger" id="logoutBtn">
+                <span>↩</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Main -->
+<main class="main">
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+            <div class="stat-icon blue">👥</div>
+            <div><div class="stat-label">Total Users</div><div class="stat-value" id="statTotal">0</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green">✅</div>
+            <div><div class="stat-label">Active</div><div class="stat-value" id="statActive">0</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon red">⛔</div>
+            <div><div class="stat-label">Inactive</div><div class="stat-value" id="statInactive">0</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon purple">📊</div>
+            <div><div class="stat-label">Total Usage</div><div class="stat-value" id="statUsage">0 B</div></div>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Search users..." oninput="filterUsers()">
+            </div>
+            <span class="user-count" id="userCountLabel"></span>
+        </div>
+    </div>
+
+    <!-- Users Grid -->
+    <div class="users-grid" id="usersGrid">
+        <!-- Cards injected by JS -->
+    </div>
+</main>
+
+<!-- User Modal -->
+<div id="userModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2 class="modal-title" id="modalTitle">Add New User</h2>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <form id="userForm" onsubmit="saveUser(event)">
+            <input type="hidden" id="userId">
+            <div class="form-group">
+                <label>Username (Client ID)</label>
+                <input type="text" id="username" required class="form-control" placeholder="e.g. john_doe">
+            </div>
+            <div class="form-group">
+                <label>Password (Auth Key)</label>
+                <input type="text" id="password" required class="form-control" placeholder="auto-generated">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Data Limit (GB)</label>
+                    <input type="number" step="0.1" min="0" id="dataLimit" class="form-control" placeholder="0 = Unlimited">
+                </div>
+                <div class="form-group">
+                    <label>Max Devices</label>
+                    <input type="number" min="0" id="deviceLimit" class="form-control" placeholder="0 = Unlimited">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Expire Date</label>
+                <input type="date" id="expireDate" class="form-control">
+            </div>
+            <div class="checkbox-row">
+                <input type="checkbox" id="isActive" checked>
+                <label for="isActive">Account Active</label>
+            </div>
+        </form>
+        <div class="modal-footer">
+            <button type="button" onclick="closeModal()" class="btn btn-ghost">Cancel</button>
+            <button type="submit" form="userForm" class="btn btn-primary">Save User</button>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Modal -->
+<div id="adminModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2 class="modal-title">Admin Settings</h2>
+            <button class="modal-close" onclick="closeAdminModal()">✕</button>
+        </div>
+        <form id="adminForm" onsubmit="updateAdmin(event)">
+            <div class="form-group">
+                <label>New Username</label>
+                <input type="text" id="newAdminUser" required class="form-control" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <label>New Password</label>
+                <input type="password" id="newAdminPass" required class="form-control" autocomplete="new-password">
+            </div>
+        </form>
+        <div class="modal-footer">
+            <button type="button" onclick="closeAdminModal()" class="btn btn-ghost">Cancel</button>
+            <button type="submit" form="adminForm" class="btn btn-primary">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'api/users';
+    let usersList = [];
+    let filteredList = [];
+
+    /* ── Helpers ── */
+    function formatBytes(bytes, d = 2) {
+        if (!+bytes) return '0 B';
+        const k = 1024, sizes = ['B','KB','MB','GB','TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(d))} ${sizes[i]}`;
+    }
+
+    function showToast(msg, icon = '✅') {
+        const t = document.getElementById('toast');
+        document.getElementById('toastMsg').textContent = msg;
+        t.firstChild.textContent = icon + ' ';
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    /* ── Auth ── */
+    let authHeader = sessionStorage.getItem('hy2_auth');
+
+    document.addEventListener("DOMContentLoaded", () => {
+        if (authHeader) {
+            document.getElementById('loginOverlay').style.display = 'none';
+            fetchUsers();
+        }
+    });
+
+    async function doLogin(e) {
+        e.preventDefault();
+        const u = document.getElementById('loginUsername').value;
+        const p = document.getElementById('loginPassword').value;
+        const btn = document.getElementById('loginBtn');
+        const err = document.getElementById('loginError');
+        btn.textContent = 'Signing in…'; btn.disabled = true;
+        err.style.display = 'none';
+        const token = 'Basic ' + btoa(u + ':' + p);
+        try {
+            const res = await fetch('api/login', { method: 'POST', headers: { Authorization: token } });
+            if (res.ok) {
+                sessionStorage.setItem('hy2_auth', token);
+                authHeader = token;
                 document.getElementById('loginOverlay').style.display = 'none';
                 fetchUsers();
-            } else {
-                document.getElementById('loginOverlay').style.display = 'flex';
-            }
-        });
+            } else { err.style.display = 'block'; }
+        } catch { err.textContent = '❌ Connection failed'; err.style.display = 'block'; }
+        btn.textContent = 'Sign In'; btn.disabled = false;
+    }
 
-        async function doLogin(e) {
-            e.preventDefault();
-            const u = document.getElementById('loginUsername').value;
-            const p = document.getElementById('loginPassword').value;
-            const btn = document.getElementById('loginBtn');
-            const err = document.getElementById('loginError');
-            
-            btn.innerText = "Signing In...";
-            btn.disabled = true;
-            err.classList.add('hidden');
-            
-            const token = 'Basic ' + btoa(u + ':' + p);
-            
-            try {
-                const res = await fetch('api/login', {
-                    method: 'POST',
-                    headers: { 'Authorization': token }
-                });
-                
-                if(res.ok) {
-                    sessionStorage.setItem('hy2_auth', token);
-                    authHeader = token;
-                    document.getElementById('loginOverlay').style.display = 'none';
-                    fetchUsers();
-                } else {
-                    err.classList.remove('hidden');
-                }
-            } catch(e) {
-                err.innerText = "Connection failed";
-                err.classList.remove('hidden');
-            }
-            btn.innerText = "Sign In";
-            btn.disabled = false;
-        }
+    function doLogout() {
+        sessionStorage.removeItem('hy2_auth');
+        authHeader = null;
+        document.getElementById('loginOverlay').style.display = 'flex';
+    }
 
-        function doLogout() {
-            sessionStorage.removeItem('hy2_auth');
-            authHeader = null;
+    async function apiFetch(url, opts = {}) {
+        if (!opts.headers) opts.headers = {};
+        if (authHeader) opts.headers.Authorization = authHeader;
+        const res = await fetch(url, opts);
+        if (res.status === 401) {
+            sessionStorage.removeItem('hy2_auth'); authHeader = null;
             document.getElementById('loginOverlay').style.display = 'flex';
+            throw new Error('Unauthorized');
+        }
+        return res;
+    }
+
+    /* ── Data ── */
+    async function fetchUsers() {
+        if (!authHeader) return;
+        try {
+            const res = await apiFetch(API_URL);
+            const data = await res.json();
+            usersList = data.users;
+            filterUsers();
+            updateStats();
+        } catch (err) { console.error(err); }
+    }
+
+    function updateStats() {
+        let active = 0, inactive = 0, totalBytes = 0;
+        usersList.forEach(u => {
+            totalBytes += u.data_used_bytes || 0;
+            const expired = u.expire_date && new Date() > new Date(u.expire_date);
+            const limitHit = u.data_limit_gb > 0 && u.data_used_bytes >= u.data_limit_gb * 1024**3;
+            if (u.is_active && !expired && !limitHit) active++;
+            else inactive++;
+        });
+        document.getElementById('statTotal').textContent = usersList.length;
+        document.getElementById('statActive').textContent = active;
+        document.getElementById('statInactive').textContent = inactive;
+        document.getElementById('statUsage').textContent = formatBytes(totalBytes);
+    }
+
+    function filterUsers() {
+        const q = (document.getElementById('searchInput').value || '').toLowerCase();
+        filteredList = q
+            ? usersList.filter(u => u.username.toLowerCase().includes(q) || u.password.toLowerCase().includes(q))
+            : [...usersList];
+        document.getElementById('userCountLabel').textContent = `${filteredList.length} user${filteredList.length !== 1 ? 's' : ''}`;
+        renderUsers();
+    }
+
+    function renderUsers() {
+        const grid = document.getElementById('usersGrid');
+        grid.innerHTML = '';
+
+        if (!filteredList.length) {
+            grid.innerHTML = `<div class="empty-state"><div class="icon">👤</div><p>No users found</p></div>`;
+            return;
         }
 
-        async function apiFetch(url, options = {}) {
-            if(!options.headers) options.headers = {};
-            if(authHeader) options.headers['Authorization'] = authHeader;
-            const res = await fetch(url, options);
-            if(res.status === 401) {
-                sessionStorage.removeItem('hy2_auth');
-                authHeader = null;
-                document.getElementById('loginOverlay').style.display = 'flex';
-                throw new Error("Unauthorized");
-            }
-            return res;
-        }
+        filteredList.forEach(u => {
+            const used = formatBytes(u.data_used_bytes);
+            const limit = u.data_limit_gb > 0 ? `${u.data_limit_gb} GB` : 'Unlimited';
+            const expired = u.expire_date && new Date() > new Date(u.expire_date);
+            const limitHit = u.data_limit_gb > 0 && u.data_used_bytes >= u.data_limit_gb * 1024**3;
 
-        async function fetchUsers() {
-            if(!authHeader) return;
-            try {
-                const res = await apiFetch(API_URL);
-                const data = await res.json();
-                usersList = data.users;
-                renderUsers();
-            } catch (err) {
-                console.error("Failed to fetch users", err);
-            }
-        }
+            let pct = 0;
+            if (u.data_limit_gb > 0) pct = Math.min(100, (u.data_used_bytes / (u.data_limit_gb * 1024**3)) * 100);
 
-        function renderUsers() {
-            const tbody = document.getElementById('userTableBody');
-            tbody.innerHTML = '';
-            
-            usersList.forEach(u => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-800/30 transition';
-                
-                const dataUsed = formatBytes(u.data_used_bytes);
-                const dataLimit = u.data_limit_gb > 0 ? `${u.data_limit_gb} GB` : 'Unlimited';
-                
-                let progressPercent = 0;
-                if (u.data_limit_gb > 0) {
-                    progressPercent = (u.data_used_bytes / (u.data_limit_gb * 1024 * 1024 * 1024)) * 100;
-                    if(progressPercent > 100) progressPercent = 100;
-                }
+            let badge, bclass;
+            if (!u.is_active)      { badge = '⛔ Disabled'; bclass = 'badge-red'; }
+            else if (expired)      { badge = '⏰ Expired';  bclass = 'badge-orange'; }
+            else if (limitHit)     { badge = '📵 Data Limit'; bclass = 'badge-red'; }
+            else                   { badge = '✅ Active';   bclass = 'badge-green'; }
 
-                let statusBadge = u.is_active 
-                    ? `<span class="px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs">Active</span>`
-                    : `<span class="px-2 py-1 rounded-full bg-red-500/20 text-red-400 text-xs">Disabled</span>`;
+            const expText = u.expire_date ? u.expire_date.split('T')[0] : 'Never';
+            const devText = u.device_limit > 0 ? u.device_limit : '∞';
 
-                // If expired by date
-                if (u.expire_date && new Date() > new Date(u.expire_date)) {
-                    statusBadge = `<span class="px-2 py-1 rounded-full bg-orange-500/20 text-orange-400 text-xs">Expired</span>`;
-                }
-                
-                // If data limit reached
-                if (u.data_limit_gb > 0 && progressPercent >= 100) {
-                    statusBadge = `<span class="px-2 py-1 rounded-full bg-red-500/20 text-red-400 text-xs">Data Limit</span>`;
-                }
+            const card = document.createElement('div');
+            card.className = 'user-card';
+            card.innerHTML = `
+                <div class="user-card-top">
+                    <div class="user-info">
+                        <div class="user-name" title="${u.username}">${u.username}</div>
+                        <div class="user-pass">${u.password}</div>
+                    </div>
+                    <span class="badge ${bclass}">${badge}</span>
+                </div>
 
-                tr.innerHTML = `
-                    <td class="px-6 py-4 font-medium">${u.username}</td>
-                    <td class="px-6 py-4 text-gray-400">${u.password}</td>
-                    <td class="px-6 py-4">${dataLimit}</td>
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-2">
-                            <span>${dataUsed}</span>
-                            ${u.data_limit_gb > 0 ? `
-                            <div class="w-16 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                                <div class="h-full ${progressPercent > 90 ? 'bg-red-500' : 'bg-primary'}" style="width: ${progressPercent}%"></div>
-                            </div>
-                            ` : ''}
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 text-gray-400">${u.expire_date ? u.expire_date.split('T')[0] : 'Never'}</td>
-                    <td class="px-6 py-4">${u.device_limit > 0 ? u.device_limit : 'Unlimited'}</td>
-                    <td class="px-6 py-4">${statusBadge}</td>
-                    <td class="px-6 py-4 text-right">
-                        <button onclick="copyLink(${u.id})" class="text-purple-400 hover:text-purple-300 mr-3 text-sm transition" title="Copy Hysteria2 Link">
-                            Copy Link
-                        </button>
-                        <button onclick="resetData(${u.id})" class="text-emerald-400 hover:text-emerald-300 mr-3 text-sm transition" title="Reset Used Data">
-                            Reset Data
-                        </button>
-                        <button onclick="editUser(${u.id})" class="text-blue-400 hover:text-blue-300 mr-3 text-sm transition">
-                            Edit
-                        </button>
-                        <button onclick="deleteUser(${u.id})" class="text-red-400 hover:text-red-300 text-sm transition">
-                            Delete
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
+                <div class="data-row">
+                    <span class="data-label">Used / Limit</span>
+                    <span class="data-value">${used} / ${limit}</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill ${pct > 85 ? 'danger' : ''}" style="width:${pct}%"></div>
+                </div>
+
+                <div class="meta-row">
+                    <div class="meta-item">📅 Expires: <span>${expText}</span></div>
+                    <div class="meta-item">📱 Devices: <span>${devText}</span></div>
+                </div>
+
+                <div class="card-actions">
+                    <button class="action-btn copy" onclick="copyLink(${u.id})" title="Copy Link">🔗 Copy</button>
+                    <button class="action-btn reset" onclick="resetData(${u.id})" title="Reset Data">🔄 Reset</button>
+                    <button class="action-btn edit" onclick="editUser(${u.id})" title="Edit">✏️ Edit</button>
+                    <button class="action-btn del" onclick="deleteUser(${u.id})" title="Delete">🗑️</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    /* ── Actions ── */
+    function copyLink(id) {
+        const u = usersList.find(x => x.id === id);
+        if (!u) return;
+        const domain = window.location.hostname;
+        // ✅ Universal link - app အားလုံးအတွက် (Clash Meta, Sing-box, ShadowRocket, NekoBox, V2rayN)
+        const link = `hysteria2://${u.password}@${domain}:443?security=tls&fm=%7B%22quicParams%22%3A%7B%22udpHop%22%3A%7B%22ports%22%3A%2220000-50000%22%7D%7D%7D&mport=20000-50000&sni=${domain}#${u.username}`;
+        navigator.clipboard.writeText(link)
+            .then(() => showToast('Link copied to clipboard!', '🔗'))
+            .catch(() => prompt('Copy this link:', link));
+    }
+
+    async function resetData(id) {
+        if (!confirm('Reset used data to 0 for this user?')) return;
+        try {
+            await apiFetch(`${API_URL}/${id}/reset_data`, { method: 'POST' });
+            showToast('Data usage reset!', '🔄');
+            fetchUsers();
+        } catch (err) { console.error(err); }
+    }
+
+    async function deleteUser(id) {
+        const u = usersList.find(x => x.id === id);
+        if (!confirm(`Delete user "${u?.username}"? This cannot be undone.`)) return;
+        try {
+            await apiFetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            showToast('User deleted', '🗑️');
+            fetchUsers();
+        } catch (err) { console.error(err); }
+    }
+
+    /* ── Modals ── */
+    function openModal() {
+        document.getElementById('modalTitle').textContent = 'Add New User';
+        document.getElementById('userForm').reset();
+        document.getElementById('userId').value = '';
+        document.getElementById('password').value = Math.random().toString(36).slice(-6);
+        document.getElementById('dataLimit').value = '0';
+        document.getElementById('deviceLimit').value = '1';
+        document.getElementById('isActive').checked = true;
+        document.getElementById('userModal').classList.add('active');
+    }
+
+    function closeModal() { document.getElementById('userModal').classList.remove('active'); }
+
+    function editUser(id) {
+        const u = usersList.find(x => x.id === id);
+        if (!u) return;
+        document.getElementById('modalTitle').textContent = 'Edit User';
+        document.getElementById('userId').value = u.id;
+        document.getElementById('username').value = u.username;
+        document.getElementById('password').value = u.password;
+        document.getElementById('dataLimit').value = u.data_limit_gb;
+        document.getElementById('deviceLimit').value = u.device_limit;
+        document.getElementById('isActive').checked = u.is_active;
+        document.getElementById('expireDate').value = u.expire_date ? u.expire_date.split('T')[0] : '';
+        document.getElementById('userModal').classList.add('active');
+    }
+
+    async function saveUser(e) {
+        e.preventDefault();
+        const id = document.getElementById('userId').value;
+        let exp = document.getElementById('expireDate').value;
+        if (exp) exp = exp + 'T23:59:59Z';
+        const payload = {
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value,
+            data_limit_gb: parseFloat(document.getElementById('dataLimit').value) || 0,
+            device_limit: parseInt(document.getElementById('deviceLimit').value) || 0,
+            expire_date: exp,
+            is_active: document.getElementById('isActive').checked
+        };
+        try {
+            const res = await apiFetch(id ? `${API_URL}/${id}` : API_URL, {
+                method: id ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
-        }
-
-        function openModal() {
-            document.getElementById('modalTitle').innerText = 'Add New User';
-            document.getElementById('userForm').reset();
-            document.getElementById('userId').value = '';
-            // Auto generate password
-            document.getElementById('password').value = Math.random().toString(36).slice(-6);
-            // Set defaults: unlimited data, unlimited days, 1 device
-            document.getElementById('dataLimit').value = '0';
-            document.getElementById('deviceLimit').value = '1';
-            document.getElementById('expireDate').value = '';
-            
-            document.getElementById('userModal').classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('userModal').classList.remove('active');
-        }
-
-        function openAdminModal() {
-            document.getElementById('adminForm').reset();
-            document.getElementById('adminModal').classList.add('active');
-        }
-
-        function closeAdminModal() {
-            document.getElementById('adminModal').classList.remove('active');
-        }
-
-        async function updateAdmin(e) {
-            e.preventDefault();
-            const u = document.getElementById('newAdminUser').value;
-            const p = document.getElementById('newAdminPass').value;
-            
-            try {
-                const res = await apiFetch('api/admin', {
-                    method: 'PUT',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({new_username: u, new_password: p})
-                });
-                if(res.ok) {
-                    alert("Admin credentials updated. Please login again.");
-                    sessionStorage.removeItem('hy2_auth');
-                    window.location.reload();
-                } else {
-                    const err = await res.json();
-                    alert("Error: " + (err.detail || "Failed to update"));
-                }
-            } catch(err) {
-                console.error(err);
-            }
-        }
-
-        function editUser(id) {
-            const u = usersList.find(x => x.id === id);
-            if(!u) return;
-            
-            document.getElementById('modalTitle').innerText = 'Edit User';
-            document.getElementById('userId').value = u.id;
-            document.getElementById('username').value = u.username;
-            document.getElementById('password').value = u.password;
-            document.getElementById('dataLimit').value = u.data_limit_gb;
-            document.getElementById('deviceLimit').value = u.device_limit;
-            document.getElementById('isActive').checked = u.is_active;
-            
-            if(u.expire_date) {
-                document.getElementById('expireDate').value = u.expire_date.split('T')[0];
+            if (res.ok) {
+                closeModal();
+                showToast(id ? 'User updated!' : 'User created!', '✅');
+                fetchUsers();
             } else {
-                document.getElementById('expireDate').value = '';
+                const err = await res.json();
+                alert('Error: ' + (err.detail || 'Failed to save'));
             }
-            
-            document.getElementById('userModal').classList.add('active');
-        }
+        } catch (err) { console.error(err); alert('Request failed'); }
+    }
 
-        function copyLink(id) {
-            const u = usersList.find(x => x.id === id);
-            if(!u) return;
-            const domain = window.location.hostname;
+    function openAdminModal() {
+        document.getElementById('adminForm').reset();
+        document.getElementById('adminModal').classList.add('active');
+    }
+    function closeAdminModal() { document.getElementById('adminModal').classList.remove('active'); }
 
-            // ✅ Universal link - app အားလုံးအတွက် (Clash Meta, Sing-box, ShadowRocket, NekoBox, V2rayN)
-            const link = `hysteria2://${u.password}@${domain}:443?security=tls&fm=%7B%22quicParams%22%3A%7B%22udpHop%22%3A%7B%22ports%22%3A%2220000-50000%22%7D%7D%7D&mport=20000-50000&sni=${domain}#${u.username}`;
-
-            navigator.clipboard.writeText(link).then(() => {
-                alert("✅ Link copied!");
-            }).catch(err => {
-                prompt("Copy this link:", link);
+    async function updateAdmin(e) {
+        e.preventDefault();
+        try {
+            const res = await apiFetch('api/admin', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    new_username: document.getElementById('newAdminUser').value,
+                    new_password: document.getElementById('newAdminPass').value
+                })
             });
-        }
-
-        async function saveUser(e) {
-            e.preventDefault();
-            const id = document.getElementById('userId').value;
-            
-            let exp = document.getElementById('expireDate').value;
-            if(exp) exp = exp + 'T23:59:59Z'; // Set to end of day
-            
-            const payload = {
-                username: document.getElementById('username').value,
-                password: document.getElementById('password').value,
-                data_limit_gb: parseFloat(document.getElementById('dataLimit').value) || 0,
-                device_limit: parseInt(document.getElementById('deviceLimit').value) || 0,
-                expire_date: exp,
-                is_active: document.getElementById('isActive').checked
-            };
-            
-            try {
-                const method = id ? 'PUT' : 'POST';
-                const url = id ? `${API_URL}/${id}` : API_URL;
-                
-                const res = await apiFetch(url, {
-                    method,
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(payload)
-                });
-                
-                if(res.ok) {
-                    closeModal();
-                    fetchUsers();
-                } else {
-                    const err = await res.json();
-                    alert("Error: " + (err.detail || "Failed to save"));
-                }
-            } catch(err) {
-                console.error(err);
-                alert("Request failed");
+            if (res.ok) {
+                alert('Admin credentials updated. Please login again.');
+                sessionStorage.removeItem('hy2_auth');
+                window.location.reload();
+            } else {
+                const err = await res.json();
+                alert('Error: ' + (err.detail || 'Failed'));
             }
-        }
+        } catch (err) { console.error(err); }
+    }
 
-        async function deleteUser(id) {
-            if(!confirm("Are you sure you want to delete this user?")) return;
-            try {
-                await apiFetch(`${API_URL}/${id}`, { method: 'DELETE' });
-                fetchUsers();
-            } catch(err) {
-                console.error(err);
-            }
-        }
-
-        async function resetData(id) {
-            if(!confirm("Are you sure you want to reset the used data to 0?")) return;
-            try {
-                await apiFetch(`${API_URL}/${id}/reset_data`, { method: 'POST' });
-                fetchUsers();
-            } catch(err) {
-                console.error(err);
-            }
-        }
-
-        // Initialize
-        // fetchUsers(); is called after login or page load
-        // Poll every 10 seconds for live updates
-        setInterval(fetchUsers, 10000);
-    </script>
+    /* ── Init ── */
+    setInterval(fetchUsers, 10000);
+</script>
 </body>
 </html>
