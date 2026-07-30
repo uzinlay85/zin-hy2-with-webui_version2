@@ -218,6 +218,91 @@ async def get_last_seen(admin: str = Depends(get_current_admin)):
     """
     return last_seen_db
 
+# --- Backup & Restore ---
+
+@app.get("/api/backup")
+def backup_database(admin: str = Depends(get_current_admin)):
+    """Export all users and admin as a JSON backup file."""
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT username, password, data_limit_gb, data_used_bytes, expire_date, device_limit, is_active FROM users WHERE role != 'admin'")
+    users = [dict(row) for row in c.fetchall()]
+    c.execute("SELECT username, password FROM users WHERE role = 'admin' LIMIT 1")
+    admin_row = c.fetchone()
+    conn.close()
+
+    backup = {
+        "version": "1",
+        "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "admin": dict(admin_row) if admin_row else {},
+        "users": users
+    }
+    from fastapi.responses import Response
+    import json
+    filename = f"hy2-backup-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}.json"
+    return Response(
+        content=json.dumps(backup, indent=2, ensure_ascii=False),
+        media_type="application/json",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
+
+class RestoreOptions(BaseModel):
+    backup: dict
+    restore_admin: bool = False  # whether to also restore admin credentials
+    mode: str = "merge"          # "merge" = skip existing, "replace" = overwrite all
+
+@app.post("/api/restore")
+def restore_database(opts: RestoreOptions, admin: str = Depends(get_current_admin)):
+    """Import users from a JSON backup. Modes: merge (skip existing) or replace (overwrite)."""
+    backup = opts.backup
+    users = backup.get("users", [])
+    if not isinstance(users, list):
+        raise HTTPException(status_code=400, detail="Invalid backup format")
+
+    conn = get_db()
+    c = conn.cursor()
+
+    # If replace mode, remove all existing non-admin users first
+    if opts.mode == "replace":
+        c.execute("DELETE FROM users WHERE role != 'admin'")
+
+    imported = 0
+    skipped = 0
+    for u in users:
+        try:
+            if opts.mode == "merge":
+                # Skip if username already exists
+                c.execute("SELECT id FROM users WHERE username = ?", (u["username"],))
+                if c.fetchone():
+                    skipped += 1
+                    continue
+            c.execute("""
+                INSERT OR REPLACE INTO users
+                  (username, password, data_limit_gb, data_used_bytes, expire_date, device_limit, is_active, role)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'user')
+            """, (
+                u.get("username", ""),
+                u.get("password", ""),
+                u.get("data_limit_gb", 0),
+                u.get("data_used_bytes", 0),
+                u.get("expire_date", ""),
+                u.get("device_limit", 0),
+                u.get("is_active", True)
+            ))
+            imported += 1
+        except Exception as e:
+            skipped += 1
+
+    # Optionally restore admin credentials
+    if opts.restore_admin and backup.get("admin"):
+        adm = backup["admin"]
+        c.execute("UPDATE users SET username=?, password=? WHERE role='admin'",
+                  (adm.get("username", admin), adm.get("password", "")))
+
+    conn.commit()
+    conn.close()
+    return {"success": True, "imported": imported, "skipped": skipped, "mode": opts.mode}
+
 @app.post("/api/users")
 def add_user(user: UserCreate, admin: str = Depends(get_current_admin)):
     conn = get_db()
