@@ -71,6 +71,10 @@ class UserCreate(BaseModel):
     device_limit: int = 0
     is_active: bool = True
 
+class AdminUpdate(BaseModel):
+    new_username: str
+    new_password: str
+
 def get_current_admin(credentials: HTTPBasicCredentials = Depends(security)):
     conn = get_db()
     c = conn.cursor()
@@ -87,6 +91,20 @@ def get_current_admin(credentials: HTTPBasicCredentials = Depends(security)):
 @app.post("/api/login")
 def login(admin: str = Depends(get_current_admin)):
     return {"success": True, "admin": admin}
+
+@app.put("/api/admin")
+def update_admin(data: AdminUpdate, current_admin: str = Depends(get_current_admin)):
+    conn = get_db()
+    c = conn.cursor()
+    try:
+        c.execute("UPDATE users SET username=?, password=? WHERE username=? AND role='admin'", 
+                  (data.new_username, data.new_password, current_admin))
+        conn.commit()
+    except sqlite3.IntegrityError:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Username already exists")
+    conn.close()
+    return {"success": True}
 
 # --- Hysteria 2 Authentication Endpoint ---
 @app.post("/auth")

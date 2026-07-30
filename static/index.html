@@ -58,9 +58,14 @@
             <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
                 Hysteria 2 Web Panel
             </h1>
-            <button onclick="openModal()" class="bg-primary hover:bg-blue-600 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg shadow-blue-500/30">
-                + Add User
-            </button>
+            <div class="flex gap-4">
+                <button onclick="openAdminModal()" class="bg-gray-700 hover:bg-gray-600 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg">
+                    Admin Settings
+                </button>
+                <button onclick="openModal()" class="bg-primary hover:bg-blue-600 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg shadow-blue-500/30">
+                    + Add User
+                </button>
+            </div>
         </header>
 
         <div class="glass rounded-2xl overflow-hidden shadow-2xl">
@@ -129,6 +134,30 @@
                 <div class="mt-8 flex justify-end gap-3">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition">Cancel</button>
                     <button type="submit" class="bg-primary hover:bg-blue-600 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg shadow-blue-500/30">Save User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Settings Modal -->
+    <div id="adminModal" class="modal fixed inset-0 z-50 items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="glass w-full max-w-sm rounded-2xl p-6 shadow-2xl transform transition-all">
+            <h2 class="text-2xl font-bold mb-6">Admin Settings</h2>
+            <form id="adminForm" onsubmit="updateAdmin(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">New Username</label>
+                        <input type="text" id="newAdminUser" required class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">New Password</label>
+                        <input type="password" id="newAdminPass" required class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-primary">
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex justify-end gap-3">
+                    <button type="button" onclick="closeAdminModal()" class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition">Cancel</button>
+                    <button type="submit" class="bg-primary hover:bg-blue-600 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg shadow-blue-500/30">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -301,6 +330,39 @@
 
         function closeModal() {
             document.getElementById('userModal').classList.remove('active');
+        }
+
+        function openAdminModal() {
+            document.getElementById('adminForm').reset();
+            document.getElementById('adminModal').classList.add('active');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.remove('active');
+        }
+
+        async function updateAdmin(e) {
+            e.preventDefault();
+            const u = document.getElementById('newAdminUser').value;
+            const p = document.getElementById('newAdminPass').value;
+            
+            try {
+                const res = await apiFetch('api/admin', {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({new_username: u, new_password: p})
+                });
+                if(res.ok) {
+                    alert("Admin credentials updated. Please login again.");
+                    sessionStorage.removeItem('hy2_auth');
+                    window.location.reload();
+                } else {
+                    const err = await res.json();
+                    alert("Error: " + (err.detail || "Failed to update"));
+                }
+            } catch(err) {
+                console.error(err);
+            }
         }
 
         function editUser(id) {
