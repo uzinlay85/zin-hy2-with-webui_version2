@@ -39,6 +39,11 @@ ufw allow 443/tcp
 ufw allow 443/udp
 ufw allow 20000:50000/udp
 
+# Block SMTP ports to prevent spam abuse
+ufw deny out 25/tcp
+ufw deny out 465/tcp
+ufw deny out 587/tcp
+
 echo -e "\n[3/7] Configuring UDP Port Hopping (UFW NAT)..."
 # Add NAT rules to UFW before.rules for port hopping
 if ! grep -q "20000:50000 -j REDIRECT" /etc/ufw/before.rules; then
