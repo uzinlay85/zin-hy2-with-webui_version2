@@ -59,6 +59,9 @@
                 Hysteria 2 Web Panel
             </h1>
             <div class="flex gap-4">
+                <button onclick="doLogout()" class="bg-red-700 hover:bg-red-600 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg">
+                    Logout
+                </button>
                 <button onclick="openAdminModal()" class="bg-gray-700 hover:bg-gray-600 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg">
                     Admin Settings
                 </button>
@@ -220,6 +223,12 @@
             }
             btn.innerText = "Sign In";
             btn.disabled = false;
+        }
+
+        function doLogout() {
+            sessionStorage.removeItem('hy2_auth');
+            authHeader = null;
+            document.getElementById('loginOverlay').style.display = 'flex';
         }
 
         async function apiFetch(url, options = {}) {
