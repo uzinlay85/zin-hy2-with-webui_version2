@@ -99,6 +99,16 @@ auth:
   http:
     url: http://127.0.0.1:3000/auth
 
+masquerade:
+  type: proxy
+  proxy:
+    url: https://bing.com/
+    rewriteHost: true
+
+acl:
+  inline:
+    - reject(all, udp/443)
+
 trafficStats:
   listen: 127.0.0.1:8080
 EOF_HY2
