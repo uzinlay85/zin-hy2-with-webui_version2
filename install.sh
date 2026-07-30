@@ -50,7 +50,11 @@ EOF_HY2_SERVICE
 
 echo -e "\n[3/6] Generating SSL Certificate (Let's Encrypt)..."
 systemctl stop nginx
-certbot certonly --standalone -d $DOMAIN --agree-tos --register-unsafely-without-email --non-interactive
+certbot certonly --standalone -d $DOMAIN --agree-tos --register-unsafely-without-email --non-interactive \
+    --pre-hook "systemctl stop nginx" \
+    --post-hook "systemctl start nginx" \
+    --deploy-hook "systemctl restart hysteria-server.service"
+
 if [ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
     echo "Error: Failed to get SSL certificate. Check if your domain is correctly pointed to this VPS IP."
     systemctl start nginx
