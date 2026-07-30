@@ -204,6 +204,11 @@
             document.getElementById('userId').value = '';
             // Auto generate password
             document.getElementById('password').value = Math.random().toString(36).slice(-6);
+            // Set defaults: unlimited data, unlimited days, 1 device
+            document.getElementById('dataLimit').value = '0';
+            document.getElementById('deviceLimit').value = '1';
+            document.getElementById('expireDate').value = '';
+            
             document.getElementById('userModal').classList.add('active');
         }
 
