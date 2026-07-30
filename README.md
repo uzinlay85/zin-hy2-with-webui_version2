@@ -50,21 +50,14 @@ Update လုပ်ပြီးပါက Browser တွင် **`Ctrl + Shift + 
 
 ---
 
-## 🔍 ၃။ ဆာဗာ အခြေအနေ စစ်ဆေးနည်းများ (Check / Maintenance)
+## 🔍 ၃။ ဆာဗာ အခြေအနေ စစ်ဆေးနည်းများ (Diagnostic Tool)
 
-Hysteria 2 Server သို့မဟုတ် Web Panel တွင် အခက်အခဲ တစ်စုံတစ်ရာ ရှိပါက အောက်ပါ Command များဖြင့် အခြေအနေကို စစ်ဆေးနိုင်သည် -
+Hysteria 2 Server သို့မဟုတ် Web Panel တွင် အခက်အခဲ တစ်စုံတစ်ရာ ရှိပါက (သို့မဟုတ်) Port များနှင့် Error Log များကို တစ်နေရာတည်းတွင် စစ်ဆေးလိုပါက အောက်ပါ Command ကို Run ပါ -
 
-**Web Panel ၏ အခြေအနေနှင့် Log ကိုကြည့်ရန်:**
 ```bash
-systemctl status hy2-panel.service --no-pager
-journalctl -u hy2-panel.service -n 50 --no-pager
+bash <(curl -fsSL https://raw.githubusercontent.com/uzinlay85/zin-hy2-with-webui_version2/main/status.sh)
 ```
-
-**Hysteria 2 Core VPN ဆာဗာ၏ အခြေအနေနှင့် Log ကိုကြည့်ရန်:**
-```bash
-systemctl status hysteria-server.service --no-pager
-journalctl -u hysteria-server.service -n 50 --no-pager
-```
+ဤ Script သည် Config ဖိုင်များ၊ Service အလုပ်လုပ်/မလုပ်၊ Firewall Port Hopping အခြေအနေနှင့် နောက်ဆုံးပေါ်နေသော Error Log များကို တစ်ပေါင်းတည်း စစ်ဆေးပြသပေးပါမည်။
 
 **🔴 Real-Time (Live) Server Log ကို စောင့်ကြည့်ရန်:**
 ဆာဗာ ပုံမှန်အလုပ်လုပ်နေသလား၊ User တွေ ချိတ်ဆက်မှုပြတ်တောက်သွားသလား၊ Error တက်နေသလား ဆိုတာကို စက္ကန့်နဲ့အမျှ (Live) ကြည့်ရှုလိုပါက အောက်ပါ Command ကို Run ပါ -
