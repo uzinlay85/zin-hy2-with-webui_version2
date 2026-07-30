@@ -2,6 +2,7 @@ import sqlite3
 import datetime
 import asyncio
 import httpx
+import time
 from fastapi import FastAPI, Request, HTTPException, Depends, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.responses import JSONResponse, FileResponse
@@ -25,6 +26,10 @@ app.add_middleware(
 DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "database.db")
 HYSTERIA_TRAFFIC_API = "http://127.0.0.1:8080"
 HYSTERIA_SECRET = "" # If you set a secret in config.yaml, put it here
+
+# In-memory last seen tracking
+last_seen_db = {}      # {"username": unix_timestamp}
+previous_online = set() # track previous online set to detect disconnects
 
 # Serve static files for the frontend
 os.makedirs("static", exist_ok=True)
@@ -206,6 +211,13 @@ async def get_online_users(admin: str = Depends(get_current_admin)):
         print(f"Error fetching online users: {e}")
     return {}
 
+@app.get("/api/lastseen")
+async def get_last_seen(admin: str = Depends(get_current_admin)):
+    """Returns last seen timestamps for offline users.
+    Response: { "username": unix_timestamp, ... }
+    """
+    return last_seen_db
+
 @app.post("/api/users")
 def add_user(user: UserCreate, admin: str = Depends(get_current_admin)):
     conn = get_db()
@@ -273,6 +285,7 @@ async def kick_user(username: str):
         print(f"Failed to kick user {username}: {e}")
 
 async def traffic_poller():
+    global previous_online
     while True:
         try:
             # Poll traffic and clear it on Hysteria side
@@ -326,7 +339,23 @@ async def traffic_poller():
                         
         except Exception as e:
             print(f"Traffic poller error: {e}")
-            
+
+        # Track last seen (who went offline since last poll)
+        try:
+            async with httpx.AsyncClient() as online_client:
+                headers = {"Authorization": HYSTERIA_SECRET} if HYSTERIA_SECRET else {}
+                online_resp = await online_client.get(f"{HYSTERIA_TRAFFIC_API}/online", headers=headers, timeout=3.0)
+                if online_resp.status_code == 200:
+                    current_online = set(online_resp.json().keys())
+                    # Users who went offline since last check
+                    went_offline = previous_online - current_online
+                    now = int(time.time())
+                    for username in went_offline:
+                        last_seen_db[username] = now
+                    previous_online = current_online
+        except Exception as e:
+            print(f"Last seen tracker error: {e}")
+
         await asyncio.sleep(10) # Poll every 10 seconds
 
 @app.on_event("startup")

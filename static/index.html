@@ -711,7 +711,8 @@
     let usersList = [];
     let filteredList = [];
     let currentView = localStorage.getItem('hy2_view') || 'list';
-    let onlineData = {}; // { username: connection_count }
+    let onlineData = {};   // { username: connection_count }
+    let lastSeenData = {}; // { username: unix_timestamp }
 
     /* ── Helpers ── */
     function formatBytes(bytes, d = 2) {
@@ -719,6 +720,15 @@
         const k = 1024, sizes = ['B','KB','MB','GB','TB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return `${parseFloat((bytes / Math.pow(k, i)).toFixed(d))} ${sizes[i]}`;
+    }
+
+    function timeAgo(unixTs) {
+        if (!unixTs) return '';
+        const secs = Math.floor(Date.now() / 1000) - unixTs;
+        if (secs < 60)  return `${secs}s ago`;
+        if (secs < 3600) return `${Math.floor(secs/60)}m ago`;
+        if (secs < 86400) return `${Math.floor(secs/3600)}h ago`;
+        return `${Math.floor(secs/86400)}d ago`;
     }
 
     function showToast(msg, icon = '✅') {
@@ -738,6 +748,7 @@
             document.getElementById('loginOverlay').style.display = 'none';
             fetchUsers();
             fetchOnline();
+            fetchLastSeen();
         }
     });
 
@@ -866,6 +877,9 @@
             const onlinePill = online
                 ? `<span class="online-badge"><span class="online-dot" style="width:6px;height:6px;"></span>${connCount} conn</span>`
                 : '';
+            const lastSeen = !online && lastSeenData[u.username]
+                ? `<span style="font-size:10px;color:var(--muted);">Last seen: ${timeAgo(lastSeenData[u.username])}</span>`
+                : '';
 
             const item = document.createElement('div');
             item.className = 'list-item' + (online ? ' list-item-online' : '');
@@ -880,7 +894,10 @@
                             ONLINE &nbsp;·&nbsp; ${connCount} conn${connCount > 1 ? 's' : ''}
                         </span>` : ''}
                     </div>
-                    <div class="list-pass">${u.password}</div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <div class="list-pass">${u.password}</div>
+                        ${lastSeen}
+                    </div>
                 </div>
                 <div class="list-meta">
                     <div class="list-meta-item">
@@ -929,6 +946,8 @@
             const { label: badge, cls: bclass } = getUserStatus(u);
             const online = isOnline(u.username);
             const connCount = onlineData[u.username] || 0;
+            const lastSeenText = !online && lastSeenData[u.username]
+                ? timeAgo(lastSeenData[u.username]) : '';
 
             const card = document.createElement('div');
             card.className = 'user-card' + (online ? ' card-online' : '');
@@ -939,7 +958,10 @@
                         <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
                             <div class="user-name" title="${u.username}">${u.username}</div>
                         </div>
-                        ${online ? `<span class="online-status-badge" style="margin-bottom:6px;display:inline-flex;"><span class="dot-anim"></span>ONLINE &nbsp;·&nbsp; ${connCount} conn${connCount>1?'s':''}</span>` : ''}
+                        ${online
+                            ? `<span class="online-status-badge" style="margin-bottom:6px;display:inline-flex;"><span class="dot-anim"></span>ONLINE &nbsp;·&nbsp; ${connCount} conn${connCount>1?'s':''}</span>`
+                            : lastSeenText ? `<span style="font-size:11px;color:var(--muted);margin-bottom:4px;display:block;">Last seen: ${lastSeenText}</span>` : ''
+                        }
                         <div class="user-pass">${u.password}</div>
                     </div>
                     <span class="badge ${bclass}">${badge}</span>
@@ -1089,11 +1111,20 @@
         if (!authHeader) return;
         try {
             const res = await apiFetch('api/online');
-            onlineData = await res.json(); // { "username": count }
+            onlineData = await res.json();
             renderOnlinePanel();
-            renderUsers(); // re-render to update online dots
+            renderUsers();
             document.getElementById('statOnline').textContent = Object.keys(onlineData).length;
         } catch (err) { console.error('Online fetch error:', err); }
+    }
+
+    async function fetchLastSeen() {
+        if (!authHeader) return;
+        try {
+            const res = await apiFetch('api/lastseen');
+            lastSeenData = await res.json(); // { "username": unix_timestamp }
+            renderUsers(); // re-render to update last seen labels
+        } catch (err) { console.error('Last seen fetch error:', err); }
     }
 
     function renderOnlinePanel() {
@@ -1125,7 +1156,8 @@
 
     /* ── Init ── */
     setInterval(fetchUsers, 10000);
-    setInterval(fetchOnline, 5000); // poll online every 5s
+    setInterval(fetchOnline, 5000);   // poll online every 5s
+    setInterval(fetchLastSeen, 10000); // poll last seen every 10s
 </script>
 </body>
 </html>
