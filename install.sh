@@ -21,7 +21,7 @@ fi
 
 echo -e "\n[1/7] Installing System Dependencies..."
 apt-get update
-apt-get install -y curl wget nginx certbot python3 python3-venv python3-pip sqlite3
+apt-get install -y curl wget nginx certbot python3 python3-venv python3-pip sqlite3 ufw
 
 echo -e "\n[2/7] Optimizing Network (BBR & Sysctl) & Firewall..."
 # Enable BBR and optimize network for VPN
@@ -33,16 +33,19 @@ net.ipv4.tcp_fastopen=3
 EOF_SYSCTL
 sysctl -p
 
-# Setup Firewall Ports using iptables (since ufw conflicts with iptables-persistent)
-iptables -I INPUT -p tcp --dport 80 -j ACCEPT
-iptables -I INPUT -p tcp --dport 443 -j ACCEPT
-iptables -I INPUT -p udp --dport 443 -j ACCEPT
-iptables -I INPUT -p udp --dport 20000:50000 -j ACCEPT
+# Setup UFW Firewall Ports
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw allow 443/udp
+ufw allow 20000:50000/udp
 
-echo -e "\n[3/7] Configuring UDP Port Hopping (iptables)..."
-DEBIAN_FRONTEND=noninteractive apt-get install -y iptables-persistent
-iptables -t nat -A PREROUTING -p udp --dport 20000:50000 -j REDIRECT --to-port 443
-netfilter-persistent save
+echo -e "\n[3/7] Configuring UDP Port Hopping (UFW NAT)..."
+# Add NAT rules to UFW before.rules for port hopping
+if ! grep -q "20000:50000 -j REDIRECT" /etc/ufw/before.rules; then
+    sed -i '1s/^/*nat\n:PREROUTING ACCEPT [0:0]\n-A PREROUTING -p udp --dport 20000:50000 -j REDIRECT --to-port 443\nCOMMIT\n\n/' /etc/ufw/before.rules
+fi
+ufw --force enable
+ufw reload
 
 echo -e "\n[4/7] Installing Hysteria 2 Core..."
 # Download directly from GitHub to bypass app.hysteria.network DNS issues
