@@ -21,7 +21,7 @@ fi
 
 echo -e "\n[1/7] Installing System Dependencies..."
 apt-get update
-apt-get install -y curl wget nginx certbot python3 python3-venv python3-pip sqlite3 ufw
+apt-get install -y curl wget nginx certbot python3 python3-venv python3-pip sqlite3
 
 echo -e "\n[2/7] Optimizing Network (BBR & Sysctl) & Firewall..."
 # Enable BBR and optimize network for VPN
@@ -33,12 +33,11 @@ net.ipv4.tcp_fastopen=3
 EOF_SYSCTL
 sysctl -p
 
-# Setup UFW Ports
-ufw allow 80/tcp
-ufw allow 443/tcp
-ufw allow 443/udp
-ufw allow 20000:50000/udp
-ufw reload
+# Setup Firewall Ports using iptables (since ufw conflicts with iptables-persistent)
+iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+iptables -I INPUT -p tcp --dport 443 -j ACCEPT
+iptables -I INPUT -p udp --dport 443 -j ACCEPT
+iptables -I INPUT -p udp --dport 20000:50000 -j ACCEPT
 
 echo -e "\n[3/7] Configuring UDP Port Hopping (iptables)..."
 DEBIAN_FRONTEND=noninteractive apt-get install -y iptables-persistent
