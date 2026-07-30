@@ -18,12 +18,11 @@ cd /opt
 if [ -d "hy2-panel" ]; then
     echo "Updating existing panel..."
     cd hy2-panel
+    git pull
 else
     echo "Downloading panel..."
-    # Normally we would git clone, but since we are copying files manually, we assume they are here
-    # If the user downloaded the zip, they should run this script from inside the extracted folder.
-    cd "$(dirname "$0")"
-    cp -r . /opt/hy2-panel
+    # Since users run this script via curl, we need to clone the repository
+    git clone https://github.com/uzinlay85/zin-hy2-with-webui_version2.git /opt/hy2-panel
     cd /opt/hy2-panel
 fi
 
