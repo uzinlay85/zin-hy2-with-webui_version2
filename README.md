@@ -66,6 +66,13 @@ systemctl status hysteria-server.service --no-pager
 journalctl -u hysteria-server.service -n 50 --no-pager
 ```
 
+**🔴 Real-Time (Live) Server Log ကို စောင့်ကြည့်ရန်:**
+ဆာဗာ ပုံမှန်အလုပ်လုပ်နေသလား၊ User တွေ ချိတ်ဆက်မှုပြတ်တောက်သွားသလား၊ Error တက်နေသလား ဆိုတာကို စက္ကန့်နဲ့အမျှ (Live) ကြည့်ရှုလိုပါက အောက်ပါ Command ကို Run ပါ -
+```bash
+journalctl -u hysteria-server.service -f
+```
+*(Live ကြည့်နေသည်ကို ရပ်တန့်လိုပါက Keyboard မှ **`Ctrl + C`** ကို နှိပ်ပါ။)*
+
 ---
 
 ## 💾 ၄။ Backup & Restore ပြုလုပ်နည်း (Data Migration)
