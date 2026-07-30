@@ -19,16 +19,33 @@ if [ -z "$DOMAIN" ]; then
     exit 1
 fi
 
-echo -e "\n[1/6] Installing System Dependencies..."
+echo -e "\n[1/7] Installing System Dependencies..."
 apt-get update
-apt-get install -y curl wget nginx certbot python3 python3-venv python3-pip sqlite3
+apt-get install -y curl wget nginx certbot python3 python3-venv python3-pip sqlite3 ufw
 
-echo -e "\n[2/6] Configuring UDP Port Hopping..."
+echo -e "\n[2/7] Optimizing Network (BBR & Sysctl) & Firewall..."
+# Enable BBR and optimize network for VPN
+cat << EOF_SYSCTL >> /etc/sysctl.conf
+net.core.default_qdisc=fq
+net.ipv4.tcp_congestion_control=bbr
+net.ipv4.ip_forward=1
+net.ipv4.tcp_fastopen=3
+EOF_SYSCTL
+sysctl -p
+
+# Setup UFW Ports
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw allow 443/udp
+ufw allow 20000:50000/udp
+ufw reload
+
+echo -e "\n[3/7] Configuring UDP Port Hopping (iptables)..."
 DEBIAN_FRONTEND=noninteractive apt-get install -y iptables-persistent
 iptables -t nat -A PREROUTING -p udp --dport 20000:50000 -j REDIRECT --to-port 443
 netfilter-persistent save
 
-echo -e "\n[2/6] Installing Hysteria 2 Core..."
+echo -e "\n[4/7] Installing Hysteria 2 Core..."
 # Download directly from GitHub to bypass app.hysteria.network DNS issues
 wget -qO /usr/local/bin/hysteria https://github.com/apernet/hysteria/releases/latest/download/hysteria-linux-amd64
 chmod +x /usr/local/bin/hysteria
@@ -50,7 +67,7 @@ Restart=always
 WantedBy=multi-user.target
 EOF_HY2_SERVICE
 
-echo -e "\n[3/6] Generating SSL Certificate (Let's Encrypt)..."
+echo -e "\n[5/7] Generating SSL Certificate (Let's Encrypt)..."
 systemctl stop nginx
 certbot certonly --standalone -d $DOMAIN --agree-tos --register-unsafely-without-email --non-interactive \
     --pre-hook "systemctl stop nginx" \
@@ -64,7 +81,7 @@ if [ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
 fi
 systemctl start nginx
 
-echo -e "\n[4/6] Configuring Hysteria 2..."
+echo -e "\n[6/7] Configuring Hysteria 2 & Web Panel..."
 mkdir -p /etc/hysteria
 echo "$DOMAIN" > /etc/hysteria/domain.txt
 
@@ -84,7 +101,7 @@ trafficStats:
   listen: 127.0.0.1:8080
 EOF_HY2
 
-echo -e "\n[5/6] Installing Web Panel..."
+# (Web Panel installation proceeds...)
 cd /opt
 if [ -d "hy2-panel" ]; then
     rm -rf hy2-panel
@@ -112,7 +129,7 @@ Restart=always
 WantedBy=multi-user.target
 EOF_SERVICE
 
-echo -e "\n[6/6] Configuring Nginx Reverse Proxy..."
+echo -e "\n[7/7] Configuring Nginx Reverse Proxy (/hy2-api/)..."
 cat << EOF_NGINX > /etc/nginx/sites-available/hy2-panel
 server {
     listen 80;
@@ -131,12 +148,17 @@ server {
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
 
-    location / {
-        proxy_pass http://127.0.0.1:3000;
+    location /hy2-api/ {
+        proxy_pass http://127.0.0.1:3000/;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+    
+    # Redirect root to /hy2-api/ for convenience, or leave it for other panels (e.g. 3x-ui)
+    location = / {
+        return 302 /hy2-api/;
     }
 }
 EOF_NGINX
@@ -154,7 +176,7 @@ systemctl restart hy2-panel.service
 echo "========================================================"
 echo "✅ Installation Completed Successfully!"
 echo "========================================================"
-echo "Web Panel URL: https://$DOMAIN"
+echo "Web Panel URL: https://$DOMAIN/hy2-api/"
 echo "Admin Login  : admin"
 echo "Password     : admin123"
 echo "========================================================"
