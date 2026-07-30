@@ -119,22 +119,25 @@ async def hysteria_auth(request: Request):
         return JSONResponse({"ok": False, "error": "invalid json"})
     
     auth_str = data.get("auth", "")
-    if ":" not in auth_str:
-        return JSONResponse({"ok": False, "error": "invalid format, use username:password"})
-    
-    username, password = auth_str.split(":", 1)
     
     conn = get_db()
     c = conn.cursor()
-    c.execute("SELECT * FROM users WHERE username = ?", (username,))
+    
+    if ":" in auth_str:
+        username, password = auth_str.split(":", 1)
+        c.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
+    else:
+        # Password only auth
+        password = auth_str
+        c.execute("SELECT * FROM users WHERE password = ?", (password,))
+        
     user = c.fetchone()
     conn.close()
     
     if not user:
-        return JSONResponse({"ok": False, "error": "user not found"})
-    
-    if user["password"] != password:
-        return JSONResponse({"ok": False, "error": "wrong password"})
+        return JSONResponse({"ok": False, "error": "user not found or wrong password"})
+        
+    username = user["username"] # Get username for tracking
         
     if not user["is_active"]:
         return JSONResponse({"ok": False, "error": "account disabled"})
