@@ -191,6 +191,21 @@ def get_users(admin: str = Depends(get_current_admin)):
     conn.close()
     return {"users": users}
 
+@app.get("/api/online")
+async def get_online_users(admin: str = Depends(get_current_admin)):
+    """Returns currently online users from Hysteria2 /online API.
+    Response: { "username": connection_count, ... }
+    """
+    try:
+        async with httpx.AsyncClient() as client:
+            headers = {"Authorization": HYSTERIA_SECRET} if HYSTERIA_SECRET else {}
+            resp = await client.get(f"{HYSTERIA_TRAFFIC_API}/online", headers=headers, timeout=3.0)
+            if resp.status_code == 200:
+                return resp.json()  # e.g. {"john": 2, "jane": 1}
+    except Exception as e:
+        print(f"Error fetching online users: {e}")
+    return {}
+
 @app.post("/api/users")
 def add_user(user: UserCreate, admin: str = Depends(get_current_admin)):
     conn = get_db()
