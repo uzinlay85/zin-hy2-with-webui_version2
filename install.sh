@@ -24,10 +24,6 @@ if [ -z "$ADMIN_PASS" ]; then
     ADMIN_PASS=$(head -c 12 /dev/urandom | base64)
 fi
 
-read -p "Enter Salamander Obfuscation Password (leave blank for random): " OBFS_PASS
-if [ -z "$OBFS_PASS" ]; then
-    OBFS_PASS=$(head -c 12 /dev/urandom | base64)
-fi
 
 echo -e "\n[1/7] Installing System Dependencies..."
 apt-get update
@@ -131,12 +127,6 @@ masquerade:
     url: https://bing.com/
     rewriteHost: true
 
-obfs:
-  type: salamander
-  salamander:
-    password: "$OBFS_PASS"
-
-
 trafficStats:
   listen: 127.0.0.1:8080
 EOF_HY2
@@ -151,7 +141,6 @@ cd /opt/hy2-panel
 
 # Inject generated passwords into Panel code
 sed -i "s/ADMIN_PASSWORD_PLACEHOLDER/$ADMIN_PASS/g" /opt/hy2-panel/main.py
-sed -i "s/OBFS_PASSWORD_PLACEHOLDER/$OBFS_PASS/g" /opt/hy2-panel/static/js/app.js
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -223,6 +212,5 @@ echo "========================================================"
 echo "Web Panel URL: https://$DOMAIN/hy2-api/"
 echo "Admin Login  : admin"
 echo "Password     : $ADMIN_PASS"
-echo "OBFS Password: $OBFS_PASS"
 echo "========================================================"
 echo "မှတ်ချက်။ ။ ပထမဆုံး Login ဝင်ပြီးပါက Admin Settings တွင် Password အသစ် ပြောင်းလဲပါ။"
