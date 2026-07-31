@@ -425,13 +425,13 @@
             font-size: 15px; cursor: pointer; border: none;
             transition: background 0.18s;
         }
-        .icon-btn.copy   { background: rgba(168,85,247,0.12); }
+        .icon-btn.copy   { background: rgba(168,85,247,0.12); color: #a855f7; }
         .icon-btn.copy:hover   { background: rgba(168,85,247,0.25); }
-        .icon-btn.reset  { background: rgba(16,185,129,0.10); }
+        .icon-btn.reset  { background: rgba(16,185,129,0.10); color: #10b981; }
         .icon-btn.reset:hover  { background: rgba(16,185,129,0.22); }
-        .icon-btn.edit   { background: rgba(59,130,246,0.10); }
+        .icon-btn.edit   { background: rgba(59,130,246,0.10); color: #60a5fa; }
         .icon-btn.edit:hover   { background: rgba(59,130,246,0.22); }
-        .icon-btn.del    { background: rgba(239,68,68,0.10); }
+        .icon-btn.del    { background: rgba(239,68,68,0.10); color: #ef4444; }
         .icon-btn.del:hover    { background: rgba(239,68,68,0.22); }
 
         /* ── View Toggle ── */
@@ -576,14 +576,7 @@
         .online-conn-count span { color: #10b981; font-weight: 600; }
         .online-empty { color: var(--muted); font-size: 13px; text-align: center; padding: 12px 0; }
 
-        
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .list-item, .user-card {
-            animation: fadeInUp 0.4s ease forwards;
-        }
+        /* Remove fadeInUp animation to prevent flashing on auto-refresh */
 
         /* ── Responsive ── */
         @media (max-width: 700px) {
