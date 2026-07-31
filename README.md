@@ -110,6 +110,36 @@ iptables -t nat -A PREROUTING -p udp --dport 20000:50000 -j REDIRECT --to-ports 
 
 ---
 
+## 🐍 ၇။ Python Virtual Environment (venv) အကြောင်း သိကောင်းစရာ
+
+`venv` ဆိုသည်မှာ Python ပရောဂျက်များအတွက် သီးသန့်ဝန်းကျင်တစ်ခု (Isolated Environment) ဖန်တီးပေးသော စနစ်ဖြစ်သည်။ 
+OS ပေါ်ရှိ မူလ Python နှင့် Package များကို မထိခိုက်စေဘဲ၊ ပရောဂျက်တစ်ခုချင်းစီအတွက် လိုအပ်သော Package များကို သီးခြားစီ ခွဲခြားသိမ်းဆည်းပေးရန် အသုံးပြုပါသည်။ (ဥပမာ - ဤ Web Panel အတွက် လိုအပ်သော `fastapi`, `bcrypt` စသည်တို့ကို OS တွင် တိုက်ရိုက်မသွင်းဘဲ `venv` ထဲတွင်သာ သွင်းထားခြင်းဖြစ်သည်။)
+
+**အသုံးပြုပုံ (ဝင်နည်း / ထွက်နည်း) -**
+
+၁။ **venv သို့ ဝင်ရောက်ခြင်း (Activate):**
+Web Panel ၏ Folder သို့သွားပြီး အောက်ပါ Command ကို Run ပါ-
+```bash
+cd /opt/hy2-panel
+source venv/bin/activate
+```
+*(အောင်မြင်ပါက Terminal ၏ ရှေ့ဆုံးတွင် `(venv)` ဟု ပေါ်လာပါမည်။ ဥပမာ - `(venv) root@server:~#`)*
+
+၂။ **Package များ သွင်းခြင်း (Installation):**
+`venv` ထဲရောက်နေချိန်တွင် `pip install` ဖြင့် သွင်းသမျှသည် ထိုပရောဂျက်အတွက်သာ သီးသန့်ဖြစ်သွားပါမည်။
+```bash
+pip install -r requirements.txt
+```
+
+၃။ **venv မှ ထွက်ခြင်း (Deactivate):**
+မူလ OS ၏ Python ဝန်းကျင်သို့ ပြန်ထွက်လိုပါက အောက်ပါ Command ကို ရိုက်ထည့်ပါ-
+```bash
+deactivate
+```
+*(Terminal ရှေ့ရှိ `(venv)` စာသား ပျောက်သွားပါမည်။)*
+
+---
+
 ## 📱 Client တွင် အသုံးပြုခြင်း (Client Usage)
 
 Web Panel မှ User တစ်ဦးစီ၏ **`🔗 Copy`** (Copy Link) ကို နှိပ်ပြီး ရလာသော `hysteria2://` URI ကို App (V2rayN, NekoBox, Sing-box, etc.) များတွင် **`Import from Clipboard`** ပြုလုပ်၍ တိုက်ရိုက် ထည့်သွင်း အသုံးပြုနိုင်ပါသည်။
