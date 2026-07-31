@@ -39,18 +39,16 @@ bash <(curl -fsSL https://raw.githubusercontent.com/uzinlay85/zin-hy2-with-webui
 
 ---
 
-## 🔄 ၂။ Update ပြုလုပ်နည်း (How to Update)
+## 🔄 ၂။ အလိုအလျောက် Update ပြုလုပ်နည်း (Auto-Updater)
 
-Web Panel တွင် Feature အသစ်များ ပါလာသည့်အခါ (သို့) ပြုပြင်ပြောင်းလဲမှုများ ရှိလာပါက ဆာဗာတွင် အောက်ပါ Command များကို Run ၍ Update ပြုလုပ်နိုင်ပါသည် -
+ဆာဗာရှိ OS လုံခြုံရေး၊ Hysteria 2 Core နှင့် Web Panel Code အပါအဝင် Python Library များကို နောက်ဆုံးပေါ်ဖြစ်စေရန်အတွက် အောက်ပါ Command တစ်ကြောင်းတည်းကို Run ၍ အလွယ်တကူ Update ပြုလုပ်နိုင်ပါသည် -
 
 ```bash
-cd /opt/hy2-panel
-git pull
-systemctl restart hy2-panel.service
+bash <(curl -fsSL https://raw.githubusercontent.com/uzinlay85/zin-hy2-with-webui_version2/main/auto_update.sh)
 ```
-Update လုပ်ပြီးပါက Browser တွင် **`Ctrl + Shift + R`** (Hard Refresh) နှိပ်၍ အသုံးပြုပါ။
+Update လုပ်ပြီးပါက Browser တွင် **`Ctrl + F5`** (Hard Refresh) နှိပ်၍ အသစ်ပြန်လည် အသုံးပြုပါ။
 
-*(မှတ်ချက်: System Update အသစ်များ ပါလာပါက Install script အသစ်အတိုင်း Database Backup ယူပြီး ပြန်လည် Install ပြုလုပ်ရန် အကြံပြုပါသည်။)*
+*(ဤနည်းလမ်းသည် စနစ်တစ်ခုလုံးကို အလိုအလျောက် ဆန်းစစ်ပြီး အသစ်ထွက်သမျှကို စိတ်ချယုံကြည်စွာ Update လုပ်ပေးသွားမည် ဖြစ်ပါသည်။)*
 
 ---
 
