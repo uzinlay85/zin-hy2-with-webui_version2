@@ -94,6 +94,22 @@ bash <(curl -fsSL https://raw.githubusercontent.com/uzinlay85/zin-hy2-with-webui
 
 ---
 
+## ⚠️ ၆။ အဖြစ်များသော ပြဿနာများ ဖြေရှင်းနည်း (Troubleshooting)
+
+**UDP Port Hopping Rules (REDIRECT) များ ထပ်နေခြင်း (Duplicate Rules):**
+`status.sh` ဖြင့် စစ်ဆေးသောအခါ `iptables Port Hopping Rules` အောက်တွင် `REDIRECT ... udp dpts:20000:50000 redir ports 443` စာကြောင်းများ အများကြီး ထပ်နေသည်ကို တွေ့ရပါက အောက်ပါ Command ကို Terminal တွင် Run ၍ ဖြေရှင်းနိုင်ပါသည် -
+
+```bash
+# ၁။ ထပ်နေသော Rule အဟောင်းများအားလုံးကို မှတ်ဉာဏ်ထဲမှ ရှင်းလင်းရန်
+while iptables -t nat -D PREROUTING -p udp --dport 20000:50000 -j REDIRECT --to-ports 443 2>/dev/null; do :; done
+
+# ၂။ Rule အသစ် တစ်ကြောင်းတည်းသာ ပြန်လည်ထည့်သွင်းရန်
+iptables -t nat -A PREROUTING -p udp --dport 20000:50000 -j REDIRECT --to-ports 443
+```
+*(မှတ်ချက် - ဤနည်းလမ်းသည် ဆာဗာ Restart မချခင်အထိ မှတ်ဉာဏ်ထဲတွင် ရှင်းလင်းသွားစေပြီး ပိုမို ပေါ့ပါးသွက်လက်စေပါသည်။)*
+
+---
+
 ## 📱 Client တွင် အသုံးပြုခြင်း (Client Usage)
 
 Web Panel မှ User တစ်ဦးစီ၏ **`🔗 Copy`** (Copy Link) ကို နှိပ်ပြီး ရလာသော `hysteria2://` URI ကို App (V2rayN, NekoBox, Sing-box, etc.) များတွင် **`Import from Clipboard`** ပြုလုပ်၍ တိုက်ရိုက် ထည့်သွင်း အသုံးပြုနိုင်ပါသည်။
