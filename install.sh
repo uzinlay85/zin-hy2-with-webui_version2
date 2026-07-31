@@ -31,7 +31,7 @@ fi
 
 echo -e "\n[1/7] Installing System Dependencies..."
 apt-get update
-apt-get install -y curl wget nginx certbot python3 python3-venv python3-pip sqlite3 ufw
+apt-get install -y curl wget nginx certbot python3 python3-venv python3-pip sqlite3 ufw git
 
 echo -e "\n[2/7] Optimizing Network (BBR & Sysctl) & Firewall..."
 # Enable BBR and optimize network for VPN
