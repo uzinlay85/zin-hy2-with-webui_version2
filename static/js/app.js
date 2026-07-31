@@ -106,12 +106,11 @@ lucide.createIcons();
     function updateStats() {
         let active = 0, inactive = 0, totalBytes = 0;
         usersList.forEach(u => {
-            totalBytes += u.data_used_bytes || 0;
+            totalBytes += Number(u.data_used_bytes) || 0;
             const expired = u.expire_date && new Date() > new Date(u.expire_date);
             const limitHit = u.data_limit_gb > 0 && u.data_used_bytes >= u.data_limit_gb * 1024**3;
             if (u.is_active && !expired && !limitHit) active++;
             else inactive++;
-            totalBytes += u.data_used_bytes;
         });
         document.getElementById('statTotal').textContent = usersList.length;
         document.getElementById('statActive').textContent = active;
