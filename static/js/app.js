@@ -34,14 +34,20 @@ lucide.createIcons();
 
     /* ── Auth ── */
     let authHeader = sessionStorage.getItem('hy2_auth');
+    let isInitialLoading = true;
 
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
         setView(currentView, false);
         if (authHeader) {
             document.getElementById('loginOverlay').style.display = 'none';
-            fetchUsers();
-            fetchOnline();
-            fetchLastSeen();
+            try {
+                await Promise.all([fetchUsers(), fetchOnline(), fetchLastSeen()]);
+            } catch (e) {
+                console.error('Initial load error:', e);
+            } finally {
+                isInitialLoading = false;
+                renderUsers();
+            }
         }
     });
 
@@ -157,7 +163,12 @@ lucide.createIcons();
         container.innerHTML = '';
 
         if (!filteredList.length) {
-            container.innerHTML = `<div class="empty-state"><div class="icon"><i data-lucide="user" class="lucide-icon icon-32"></i></div><p>No users found</p></div>`;
+            if (isInitialLoading) {
+                container.innerHTML = `<div class="empty-state"><div class="icon" style="animation: spin 1s linear infinite;"><i data-lucide="loader-2" class="lucide-icon icon-32"></i></div><p style="color:var(--muted);margin-top:8px;">Loading data...</p></div>`;
+            } else {
+                container.innerHTML = `<div class="empty-state"><div class="icon"><i data-lucide="user" class="lucide-icon icon-32"></i></div><p>No users found</p></div>`;
+            }
+            lucide.createIcons();
             return;
         }
 

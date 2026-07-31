@@ -302,20 +302,28 @@ def get_users(admin: str = Depends(get_current_admin)):
         users.append(u)
     return {"users": users}
 
+# Shared AsyncClient & Online Status Cache for instant API responses
+HTTP_CLIENT = httpx.AsyncClient(timeout=2.0)
+online_cache = {}
+online_cache_time = 0
+
 @app.get("/api/online")
 async def get_online_users(admin: str = Depends(get_current_admin)):
-    """Returns currently online users from Hysteria2 /online API.
-    Response: { "username": connection_count, ... }
-    """
+    """Returns currently online users from Hysteria2 /online API."""
+    global online_cache, online_cache_time
+    now = time.time()
+    if now - online_cache_time < 2.0:
+        return online_cache
     try:
-        async with httpx.AsyncClient() as client:
-            headers = {"Authorization": HYSTERIA_SECRET} if HYSTERIA_SECRET else {}
-            resp = await client.get(f"{HYSTERIA_TRAFFIC_API}/online", headers=headers, timeout=3.0)
-            if resp.status_code == 200:
-                return resp.json()  # e.g. {"john": 2, "jane": 1}
+        headers = {"Authorization": HYSTERIA_SECRET} if HYSTERIA_SECRET else {}
+        resp = await HTTP_CLIENT.get(f"{HYSTERIA_TRAFFIC_API}/online", headers=headers)
+        if resp.status_code == 200:
+            online_cache = resp.json()
+            online_cache_time = now
+            return online_cache
     except Exception as e:
         print(f"Error fetching online users: {e}")
-    return {}
+    return online_cache
 
 @app.get("/api/lastseen")
 async def get_last_seen(admin: str = Depends(get_current_admin)):
