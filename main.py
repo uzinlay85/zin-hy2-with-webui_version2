@@ -51,6 +51,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE,
             password TEXT,
+            display_password TEXT,
             data_limit_gb REAL DEFAULT 0,
             data_used_bytes INTEGER DEFAULT 0,
             expire_date TEXT,
@@ -59,6 +60,11 @@ def init_db():
             role TEXT DEFAULT 'user'
         )
     ''')
+    # Migration: add display_password column for existing databases
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN display_password TEXT")
+    except Exception:
+        pass  # Column already exists
     
     # Create default admin if not exists
     c.execute("SELECT * FROM users WHERE role='admin'")
@@ -199,11 +205,13 @@ async def hysteria_auth(request: Request):
         except Exception:
             is_valid = False
     else:
-        # Plaintext - verify and upgrade
+        # Plaintext - verify and upgrade to bcrypt on first successful auth
         if db_password == input_password:
             is_valid = True
             new_hash = bcrypt.hashpw(input_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-            c.execute("UPDATE users SET password = ? WHERE id = ?", (new_hash, user["id"]))
+            # Save bcrypt hash AND save original password to display_password for URI generation
+            c.execute("UPDATE users SET password = ?, display_password = ? WHERE id = ?",
+                      (new_hash, input_password, user["id"]))
             conn.commit()
     
     if not is_valid:
@@ -265,9 +273,21 @@ async def hysteria_auth(request: Request):
 def get_users(admin: str = Depends(get_current_admin)):
     conn = get_db()
     c = conn.cursor()
-    c.execute("SELECT id, username, password, data_limit_gb, data_used_bytes, expire_date, device_limit, is_active, role FROM users WHERE role != 'admin'")
-    users = [dict(row) for row in c.fetchall()]
+    c.execute("SELECT id, username, password, display_password, data_limit_gb, data_used_bytes, expire_date, device_limit, is_active, role FROM users WHERE role != 'admin'")
+    rows = c.fetchall()
     conn.close()
+    users = []
+    for row in rows:
+        u = dict(row)
+        # Return display_password (original) as 'password' for link generation in the UI.
+        # Fall back to password field for legacy users who haven't connected yet after upgrade.
+        raw_pw = u.get("display_password") or u.get("password", "")
+        # If the fallback is a bcrypt hash (old bug), show placeholder so admin knows to reset
+        if raw_pw and (raw_pw.startswith("$2b$") or raw_pw.startswith("$2a$")):
+            raw_pw = "[RESET PASSWORD - Edit user to set new password]"  # tells admin to reset
+        u["password"] = raw_pw
+        del u["display_password"]
+        users.append(u)
     return {"users": users}
 
 @app.get("/api/online")
@@ -299,8 +319,16 @@ def backup_database(admin: str = Depends(get_current_admin)):
     """Export all users and admin as a JSON backup file."""
     conn = get_db()
     c = conn.cursor()
-    c.execute("SELECT username, password, data_limit_gb, data_used_bytes, expire_date, device_limit, is_active FROM users WHERE role != 'admin'")
-    users = [dict(row) for row in c.fetchall()]
+    # Export display_password (original) as the password field in backup
+    c.execute("SELECT username, password, display_password, data_limit_gb, data_used_bytes, expire_date, device_limit, is_active FROM users WHERE role != 'admin'")
+    rows = c.fetchall()
+    users = []
+    for row in rows:
+        u = dict(row)
+        # Use display_password (original) for backup so it can be used in URIs after restore
+        u["password"] = u.get("display_password") or u.get("password", "")
+        del u["display_password"]
+        users.append(u)
     c.execute("SELECT username, password FROM users WHERE role = 'admin' LIMIT 1")
     admin_row = c.fetchone()
     conn.close()
@@ -350,13 +378,23 @@ def restore_database(opts: RestoreOptions, admin: str = Depends(get_current_admi
                 if c.fetchone():
                     skipped += 1
                     continue
+            raw_pw = u.get("password", "")
+            # Always store display_password as the original plaintext for URI generation
+            display_pw = raw_pw
+            # If password is plaintext, hash it for storage
+            if raw_pw and not (raw_pw.startswith("$2b$") or raw_pw.startswith("$2a$")):
+                hashed_pw = bcrypt.hashpw(raw_pw.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            else:
+                hashed_pw = raw_pw  # Already hashed (old backup), keep as-is
+                display_pw = u.get("display_password", raw_pw)  # Preserve original if available
             c.execute("""
                 INSERT OR REPLACE INTO users
-                  (username, password, data_limit_gb, data_used_bytes, expire_date, device_limit, is_active, role)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'user')
+                  (username, password, display_password, data_limit_gb, data_used_bytes, expire_date, device_limit, is_active, role)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'user')
             """, (
                 u.get("username", ""),
-                u.get("password", ""),
+                hashed_pw,
+                display_pw,
                 u.get("data_limit_gb", 0),
                 u.get("data_used_bytes", 0),
                 u.get("expire_date", ""),
@@ -382,12 +420,13 @@ def add_user(user: UserCreate, admin: str = Depends(get_current_admin)):
     conn = get_db()
     c = conn.cursor()
     try:
-        # Hash the password with bcrypt before storing
+        # Store original password for URI display, bcrypt hash for authentication
         hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         c.execute("""
-            INSERT INTO users (username, password, data_limit_gb, expire_date, device_limit, is_active)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (user.username, hashed_password, user.data_limit_gb, user.expire_date, user.device_limit, user.is_active))
+            INSERT INTO users (username, password, display_password, data_limit_gb, expire_date, device_limit, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (user.username, hashed_password, user.password,
+               user.data_limit_gb, user.expire_date, user.device_limit, user.is_active))
         conn.commit()
     except sqlite3.IntegrityError:
         conn.close()
@@ -401,16 +440,30 @@ def update_user(user_id: int, user: UserCreate, admin: str = Depends(get_current
     c = conn.cursor()
     # Check if password is being changed (not already hashed)
     if user.password and not (user.password.startswith("$2b$") or user.password.startswith("$2a$")):
+        # New plaintext password: hash for auth, keep original for display/URI
         new_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        display_pw = user.password
     else:
-        new_password = user.password  # Keep existing hash if already hashed
-    c.execute("""
-        UPDATE users SET username=?, password=?, data_limit_gb=?, expire_date=?, device_limit=?, is_active=?
-        WHERE id=? AND role != 'admin'
-    """, (user.username, new_password, user.data_limit_gb, user.expire_date, user.device_limit, user.is_active, user_id))
+        # Already hashed (e.g., from legacy path): keep hash, don't touch display_password
+        new_password = user.password
+        display_pw = None  # Will use COALESCE to keep existing display_password in DB
+    
+    if display_pw is not None:
+        c.execute("""
+            UPDATE users SET username=?, password=?, display_password=?,
+                             data_limit_gb=?, expire_date=?, device_limit=?, is_active=?
+            WHERE id=? AND role != 'admin'
+        """, (user.username, new_password, display_pw,
+               user.data_limit_gb, user.expire_date, user.device_limit, user.is_active, user_id))
+    else:
+        c.execute("""
+            UPDATE users SET username=?, password=?,
+                             data_limit_gb=?, expire_date=?, device_limit=?, is_active=?
+            WHERE id=? AND role != 'admin'
+        """, (user.username, new_password,
+               user.data_limit_gb, user.expire_date, user.device_limit, user.is_active, user_id))
     conn.commit()
     conn.close()
-    
     return {"success": True}
 
 from fastapi import BackgroundTasks
