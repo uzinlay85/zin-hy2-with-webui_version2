@@ -146,6 +146,25 @@ masquerade:
 
 trafficStats:
   listen: 127.0.0.1:8080
+
+# Cellular NAT & App Stability Optimizations
+quic:
+  initStreamReceiveWindow: 8388608
+  maxStreamReceiveWindow: 8388608
+  initConnReceiveWindow: 20971520
+  maxConnReceiveWindow: 20971520
+  maxIdleTimeout: 30s
+  keepAlivePeriod: 10s
+
+resolver:
+  type: udp
+  udp:
+    addr: 1.1.1.1:53
+    timeout: 4s
+
+bandwidth:
+  up: 1 gbps
+  down: 1 gbps
 EOF_HY2
 
 # (Web Panel installation proceeds...)

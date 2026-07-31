@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 # ============================================================
 # Hysteria 2 Panel - One-Time Stability & Security Fix Script
 # ============================================================
@@ -168,7 +168,7 @@ fi
 # ----------------------------------------------------------------
 # [FIX 5] Panel Code Update (GitHub မှ Pull)
 # ----------------------------------------------------------------
-echo -e "\n[5/5] Updating Web Panel code from GitHub..."
+echo -e "\n[5/6] Updating Web Panel code from GitHub..."
 
 PANEL_DIR="/opt/hy2-panel"
 if [ -d "$PANEL_DIR/.git" ]; then
@@ -179,6 +179,40 @@ else
     echo "  ⚠️  Git repo မတွေ့ပါ - Manual update လုပ်ပါ"
 fi
 cd /root
+
+# ----------------------------------------------------------------
+# [FIX 6] Hysteria 2 Config - QUIC Keep-Alive & DNS Resolver
+# ----------------------------------------------------------------
+echo -e "\n[6/6] Optimizing Hysteria 2 config (QUIC Keep-Alive + Cloudflare DNS)..."
+
+if [ -f /etc/hysteria/config.yaml ]; then
+    if ! grep -q "keepAlivePeriod:" /etc/hysteria/config.yaml; then
+        cat >> /etc/hysteria/config.yaml << 'EOF_HY2_OPT'
+
+# Cellular NAT & App Stability Optimizations (Keep-Alive + DNS Resolver)
+quic:
+  initStreamReceiveWindow: 8388608
+  maxStreamReceiveWindow: 8388608
+  initConnReceiveWindow: 20971520
+  maxConnReceiveWindow: 20971520
+  maxIdleTimeout: 30s
+  keepAlivePeriod: 10s
+
+resolver:
+  type: udp
+  udp:
+    addr: 1.1.1.1:53
+    timeout: 4s
+
+bandwidth:
+  up: 1 gbps
+  down: 1 gbps
+EOF_HY2_OPT
+        echo "  ✅ QUIC Keep-Alive (10s) and Cloudflare DNS added to /etc/hysteria/config.yaml"
+    else
+        echo "  ✅ config.yaml already contains QUIC optimizations"
+    fi
+fi
 
 # ----------------------------------------------------------------
 # Restart Services
