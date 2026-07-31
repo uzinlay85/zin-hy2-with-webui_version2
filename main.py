@@ -149,7 +149,8 @@ def update_admin(request: Request, data: AdminUpdate, current_admin: str = Depen
 # In-memory auth cache to prevent CPU spikes from repeated client reconnections
 # {auth_str: (is_valid, username, expire_timestamp)}
 AUTH_CACHE = {}
-AUTH_CACHE_TTL = 60  # seconds
+AUTH_CACHE_SUCCESS_TTL = 60  # seconds
+AUTH_CACHE_FAILURE_TTL = 3   # seconds (short so fixed credentials work immediately)
 
 @app.post("/auth")
 async def hysteria_auth(request: Request):
@@ -162,7 +163,10 @@ async def hysteria_auth(request: Request):
     except:
         return JSONResponse({"ok": False, "error": "invalid json"})
     
-    auth_str = data.get("auth", "")
+    auth_str = data.get("auth", "").strip()
+    if not auth_str:
+        return JSONResponse({"ok": False, "error": "empty auth"})
+
     now = time.time()
 
     # Fast path: check in-memory cache first (prevents CPU spikes on reconnects)
@@ -171,9 +175,7 @@ async def hysteria_auth(request: Request):
         if now < exp:
             if not cached_valid:
                 return JSONResponse({"ok": False, "error": "user not found or wrong password"})
-            # Re-verify active status & limits lightweight if needed, or pass
-            username = cached_user
-            return JSONResponse({"ok": True, "id": username})
+            return JSONResponse({"ok": True, "id": cached_user})
 
     conn = get_db()
     c = conn.cursor()
@@ -208,7 +210,7 @@ async def hysteria_auth(request: Request):
     
     if not user:
         conn.close()
-        AUTH_CACHE[auth_str] = (False, "", now + AUTH_CACHE_TTL)
+        AUTH_CACHE[auth_str] = (False, "", now + AUTH_CACHE_FAILURE_TTL)
         return JSONResponse({"ok": False, "error": "user not found or wrong password"})
     
     # Password verification (Fast path: O(1) string check on display_password)
@@ -228,18 +230,22 @@ async def hysteria_auth(request: Request):
     elif db_password.startswith("$2b$") or db_password.startswith("$2a$"):
         try:
             is_valid = bcrypt.checkpw(input_password.encode('utf-8'), db_password.encode('utf-8'))
+            if is_valid and not display_pw:
+                c.execute("UPDATE users SET display_password = ? WHERE id = ?", (input_password, user["id"]))
+                conn.commit()
         except Exception:
             is_valid = False
 
     if not is_valid:
         conn.close()
-        AUTH_CACHE[auth_str] = (False, "", now + AUTH_CACHE_TTL)
+        AUTH_CACHE[auth_str] = (False, "", now + AUTH_CACHE_FAILURE_TTL)
         return JSONResponse({"ok": False, "error": "user not found or wrong password"})
         
     username = user["username"]  # Get username for tracking
         
     if not user["is_active"]:
         conn.close()
+        AUTH_CACHE[auth_str] = (False, "", now + AUTH_CACHE_FAILURE_TTL)
         return JSONResponse({"ok": False, "error": "account disabled"})
         
     # Check Expiration
@@ -249,10 +255,12 @@ async def hysteria_auth(request: Request):
             if exp_date.tzinfo is None:
                 if datetime.datetime.now() > exp_date:
                     conn.close()
+                    AUTH_CACHE[auth_str] = (False, "", now + AUTH_CACHE_FAILURE_TTL)
                     return JSONResponse({"ok": False, "error": "account expired"})
             else:
                 if datetime.datetime.now(datetime.timezone.utc) > exp_date:
                     conn.close()
+                    AUTH_CACHE[auth_str] = (False, "", now + AUTH_CACHE_FAILURE_TTL)
                     return JSONResponse({"ok": False, "error": "account expired"})
         except Exception as e:
             pass  # Invalid date format, ignore
@@ -262,26 +270,13 @@ async def hysteria_auth(request: Request):
         limit_bytes = user["data_limit_gb"] * 1024 * 1024 * 1024
         if user["data_used_bytes"] >= limit_bytes:
             conn.close()
+            AUTH_CACHE[auth_str] = (False, "", now + AUTH_CACHE_FAILURE_TTL)
             return JSONResponse({"ok": False, "error": "data limit reached"})
             
     conn.close()
     
-    # Check Device Limit via Hysteria Online API
-    if user["device_limit"] > 0:
-        try:
-            async with httpx.AsyncClient() as client:
-                headers = {"Authorization": HYSTERIA_SECRET} if HYSTERIA_SECRET else {}
-                resp = await client.get(f"{HYSTERIA_TRAFFIC_API}/online", headers=headers, timeout=2.0)
-                if resp.status_code == 200:
-                    online_data = resp.json()
-                    current_devices = online_data.get(username, 0)
-                    if current_devices >= user["device_limit"]:
-                        return JSONResponse({"ok": False, "error": "device limit reached"})
-        except Exception as e:
-            print(f"Error checking online devices: {e}")
-
-    # Success! Cache the result for 60s to prevent CPU load on frequent reconnections
-    AUTH_CACHE[auth_str] = (True, username, now + AUTH_CACHE_TTL)
+    # Success! Cache successful auth for 60s
+    AUTH_CACHE[auth_str] = (True, username, now + AUTH_CACHE_SUCCESS_TTL)
     return JSONResponse({"ok": True, "id": username})
 
 # --- Management API (For Web Panel) ---
