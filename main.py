@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
 import secrets
-from passlib.context import CryptContext
+import bcrypt
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -20,7 +20,6 @@ app = FastAPI(title="Hysteria 2 Panel API")
 security = HTTPBasic()
 
 # Security Setup
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -102,12 +101,12 @@ def get_current_admin(credentials: HTTPBasicCredentials = Depends(security)):
     
     # Check if password is mathematically hashed
     if db_password.startswith("$2b$") or db_password.startswith("$2a$"):
-        is_valid = pwd_context.verify(credentials.password, db_password)
+        is_valid = bcrypt.checkpw(credentials.password.encode('utf-8'), db_password.encode('utf-8'))
     else:
         # Plaintext check (Transparent Upgrade to Hash)
         if db_password == credentials.password:
             is_valid = True
-            hashed_password = pwd_context.hash(credentials.password)
+            hashed_password = bcrypt.hashpw(credentials.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
             c.execute("UPDATE users SET password = ? WHERE id = ?", (hashed_password, admin["id"]))
             conn.commit()
 
@@ -131,7 +130,7 @@ def update_admin(request: Request, data: AdminUpdate, current_admin: str = Depen
     conn = get_db()
     c = conn.cursor()
     try:
-        hashed_password = pwd_context.hash(data.new_password)
+        hashed_password = bcrypt.hashpw(data.new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         c.execute("UPDATE users SET username=?, password=? WHERE username=? AND role='admin'", 
                   (data.new_username, hashed_password, current_admin))
         conn.commit()

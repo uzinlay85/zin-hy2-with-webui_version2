@@ -1,6 +1,6 @@
 fastapi
 uvicorn
 httpx
-passlib[bcrypt]
+bcrypt
 slowapi
 pydantic
