@@ -11,17 +11,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
 import secrets
+from passlib.context import CryptContext
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 app = FastAPI(title="Hysteria 2 Panel API")
 security = HTTPBasic()
 
-# Allow CORS for development
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Security Setup
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Removed permissive CORSMiddleware to enforce Same-Origin Policy
 
 DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "database.db")
 HYSTERIA_TRAFFIC_API = "http://127.0.0.1:8080"
@@ -85,8 +89,31 @@ def get_current_admin(credentials: HTTPBasicCredentials = Depends(security)):
     c = conn.cursor()
     c.execute("SELECT * FROM users WHERE username = ? AND role = 'admin'", (credentials.username,))
     admin = c.fetchone()
+    
+    if not admin:
+        conn.close()
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password"
+        )
+        
+    db_password = admin["password"]
+    is_valid = False
+    
+    # Check if password is mathematically hashed
+    if db_password.startswith("$2b$") or db_password.startswith("$2a$"):
+        is_valid = pwd_context.verify(credentials.password, db_password)
+    else:
+        # Plaintext check (Transparent Upgrade to Hash)
+        if db_password == credentials.password:
+            is_valid = True
+            hashed_password = pwd_context.hash(credentials.password)
+            c.execute("UPDATE users SET password = ? WHERE id = ?", (hashed_password, admin["id"]))
+            conn.commit()
+
     conn.close()
-    if not admin or admin["password"] != credentials.password:
+    
+    if not is_valid:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password"
@@ -94,16 +121,19 @@ def get_current_admin(credentials: HTTPBasicCredentials = Depends(security)):
     return admin["username"]
 
 @app.post("/api/login")
-def login(admin: str = Depends(get_current_admin)):
+@limiter.limit("5/minute")
+def login(request: Request, admin: str = Depends(get_current_admin)):
     return {"success": True, "admin": admin}
 
 @app.put("/api/admin")
-def update_admin(data: AdminUpdate, current_admin: str = Depends(get_current_admin)):
+@limiter.limit("5/minute")
+def update_admin(request: Request, data: AdminUpdate, current_admin: str = Depends(get_current_admin)):
     conn = get_db()
     c = conn.cursor()
     try:
+        hashed_password = pwd_context.hash(data.new_password)
         c.execute("UPDATE users SET username=?, password=? WHERE username=? AND role='admin'", 
-                  (data.new_username, data.new_password, current_admin))
+                  (data.new_username, hashed_password, current_admin))
         conn.commit()
     except sqlite3.IntegrityError:
         conn.close()
