@@ -581,12 +581,20 @@
 
         /* ── Responsive ── */
         @media (max-width: 700px) {
-            .header-brand h1 { font-size: 15px; }
+            .header-brand h1 { font-size: 14px; }
+            .header-brand .dot { width: 28px; height: 28px; }
+            .btn { padding: 8px 10px; }
+            .header-actions { gap: 4px; }
             .btn > span:last-child { display: none; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
             .users-grid { grid-template-columns: 1fr; }
             .list-meta { display: none; }
             .list-progress { display: none; }
+            
+            /* Fix list item overlap on small screens */
+            .list-item { flex-wrap: wrap; gap: 10px; padding: 12px; }
+            .list-main { flex: 1; min-width: 120px; }
+            .list-actions { width: 100%; justify-content: flex-end; padding-top: 8px; border-top: 1px solid var(--border); }
         }
     </style>
 </head>
@@ -636,7 +644,7 @@
                 <span><i data-lucide="user-plus" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i></span><span>Add User</span>
             </button>
             <button onclick="doLogout()" class="btn btn-danger" id="logoutBtn">
-                <span><i data-lucide="log-out" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i></span>
+                <span><i data-lucide="log-out" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i></span><span>Logout</span>
             </button>
         </div>
     </div>
