@@ -6,33 +6,35 @@
     <title>Hysteria 2 Panel</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%236366f1' /><stop offset='100%25' stop-color='%2306b6d4' /></linearGradient></defs><rect width='100' height='100' rx='25' fill='url(%23g)' /><path d='M58 20L32 60h20l-8 25 32-40H54l10-25z' fill='white' /></svg>" type="image/svg+xml">
     <meta name="description" content="Hysteria 2 VPN Web Management Panel">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="static/css/style.css?v=1.3">
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <link rel="stylesheet" href="static/css/style.css?v=1.4">
 </head>
 <body>
 
 <!-- Toast -->
-<div id="toast"><i data-lucide="check-circle" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i> <span id="toastMsg">Done</span></div>
+<div id="toast"><i data-lucide="check-circle" class="lucide-icon icon-22"></i> <span id="toastMsg">Done</span></div>
 
 <!-- Login Overlay -->
 <div id="loginOverlay">
     <div class="login-card">
         <div class="login-logo">
-            <div class="icon"><i data-lucide="rocket" style="width:28px;height:28px;color:white;display:inline-block;vertical-align:middle;"></i></div>
+            <div class="icon"><i data-lucide="rocket" class="lucide-icon icon-28" style="color:white"></i></div>
             <h1>Hysteria 2 Panel</h1>
             <p>Sign in to manage your VPN users</p>
         </div>
         <form id="loginForm" onsubmit="doLogin(event)">
             <div class="form-group">
-                <label>Username</label>
+                <label for="loginUsername">Username</label>
                 <input type="text" id="loginUsername" class="form-control" required autocomplete="username" placeholder="admin">
             </div>
             <div class="form-group">
-                <label>Password</label>
+                <label for="loginPassword">Password</label>
                 <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password" placeholder="••••••••">
             </div>
-            <p id="loginError" style="color:#ef4444;font-size:13px;margin-bottom:12px;display:none;"><i data-lucide="x-circle" style="width:18px;height:18px;display:inline-block;vertical-align:middle;"></i> Invalid username or password</p>
+            <p id="loginError" style="color:#ef4444;font-size:13px;margin-bottom:12px;display:none;"><i data-lucide="x-circle" class="lucide-icon icon-18"></i> Invalid username or password</p>
             <button type="submit" id="loginBtn" class="btn btn-primary btn-full">Sign In</button>
         </form>
     </div>
@@ -42,21 +44,21 @@
 <header class="header">
     <div class="header-inner">
         <div class="header-brand">
-            <div class="dot"><i data-lucide="zap" style="width:20px;height:20px;color:white;fill:white;display:inline-block;vertical-align:middle;"></i></div>
+            <div class="dot"><i data-lucide="zap" class="lucide-icon icon-20" style="color:white;fill:white"></i></div>
             <h1>Hysteria 2 Panel</h1>
         </div>
         <div class="header-actions">
             <button onclick="openBackupModal()" class="btn btn-ghost" id="backupBtn">
-                <span><i data-lucide="save" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i></span><span>Backup</span>
+                <span><i data-lucide="save" class="lucide-icon icon-16"></i></span><span>Backup</span>
             </button>
             <button onclick="openAdminModal()" class="btn btn-ghost" id="adminSettingsBtn">
-                <span><i data-lucide="settings" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i></span><span>Settings</span>
+                <span><i data-lucide="settings" class="lucide-icon icon-16"></i></span><span>Settings</span>
             </button>
             <button onclick="openModal()" class="btn btn-primary" id="addUserBtn">
-                <span><i data-lucide="user-plus" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i></span><span>Add User</span>
+                <span><i data-lucide="user-plus" class="lucide-icon icon-16"></i></span><span>Add User</span>
             </button>
             <button onclick="doLogout()" class="btn btn-danger" id="logoutBtn">
-                <span><i data-lucide="log-out" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i></span><span>Logout</span>
+                <span><i data-lucide="log-out" class="lucide-icon icon-16"></i></span><span>Logout</span>
             </button>
         </div>
     </div>
@@ -67,22 +69,22 @@
     <!-- Stats -->
     <div class="stats-grid" id="statsGrid">
         <div class="stat-card">
-            <div class="stat-icon blue"><i data-lucide="users" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i></div>
+            <div class="stat-icon blue"><i data-lucide="users" class="lucide-icon icon-22"></i></div>
             <div><div class="stat-label">Total Users</div><div class="stat-value" id="statTotal">0</div></div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon green"><i data-lucide="check-circle" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i></div>
+            <div class="stat-icon green"><i data-lucide="check-circle" class="lucide-icon icon-22"></i></div>
             <div><div class="stat-label">Active</div><div class="stat-value" id="statActive">0</div></div>
         </div>
         <div class="stat-card" style="border-color: rgba(16,185,129,0.3);">
             <div class="stat-icon green" style="position:relative;">
-                <span><i data-lucide="activity" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i></span>
+                <span><i data-lucide="activity" class="lucide-icon icon-22"></i></span>
                 <span style="position:absolute;top:4px;right:4px;width:7px;height:7px;background:#10b981;border-radius:50%;animation:pulse-green 2s infinite;"></span>
             </div>
             <div><div class="stat-label" style="color:#10b981;">Online Now</div><div class="stat-value" id="statOnline" style="color:#10b981;">0</div></div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon purple"><i data-lucide="bar-chart-2" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i></div>
+            <div class="stat-icon purple"><i data-lucide="bar-chart-2" class="lucide-icon icon-22"></i></div>
             <div><div class="stat-label">Total Usage</div><div class="stat-value" id="statUsage">0 B</div></div>
         </div>
     </div>
@@ -106,7 +108,7 @@
     <div class="toolbar">
         <div class="toolbar-left">
             <div class="search-wrap">
-                <span class="search-icon"><i data-lucide="search" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i></span>
+                <span class="search-icon"><i data-lucide="search" class="lucide-icon icon-16"></i></span>
                 <input type="text" id="searchInput" placeholder="Search users..." oninput="filterUsers()">
             </div>
             <span class="user-count" id="userCountLabel"></span>
@@ -128,7 +130,7 @@
     <div class="modal-box">
         <div class="modal-header">
             <h2 class="modal-title" id="modalTitle">Add New User</h2>
-            <button class="modal-close" onclick="closeModal()"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
+            <button class="modal-close" onclick="closeModal()"><i data-lucide="x" class="lucide-icon icon-20"></i></button>
         </div>
         <form id="userForm" onsubmit="saveUser(event)">
             <input type="hidden" id="userId">
@@ -171,7 +173,7 @@
     <div class="modal-box">
         <div class="modal-header">
             <h2 class="modal-title">Admin Settings</h2>
-            <button class="modal-close" onclick="closeAdminModal()"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
+            <button class="modal-close" onclick="closeAdminModal()"><i data-lucide="x" class="lucide-icon icon-20"></i></button>
         </div>
         <form id="adminForm" onsubmit="updateAdmin(event)">
             <div class="form-group">
@@ -194,21 +196,21 @@
 <div id="backupModal" class="modal-overlay">
     <div class="modal-box" style="max-width:480px;">
         <div class="modal-header">
-            <h2 class="modal-title"><i data-lucide="save" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i> Backup &amp; Restore</h2>
-            <button class="modal-close" onclick="closeBackupModal()"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
+            <h2 class="modal-title"><i data-lucide="save" class="lucide-icon icon-16"></i> Backup &amp; Restore</h2>
+            <button class="modal-close" onclick="closeBackupModal()"><i data-lucide="x" class="lucide-icon icon-20"></i></button>
         </div>
 
         <!-- Backup Section -->
         <div style="margin-bottom:22px;">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                <span style="font-size:20px;"><i data-lucide="upload" style="width:24px;height:24px;display:inline-block;vertical-align:middle;"></i></span>
+                <span style="font-size:20px;"><i data-lucide="upload" class="lucide-icon icon-24"></i></span>
                 <div>
                     <div style="font-size:14px;font-weight:600;">Download Backup</div>
                     <div style="font-size:12px;color:var(--muted);">All users, passwords, data usage saved to JSON file</div>
                 </div>
             </div>
             <button onclick="doBackup()" class="btn btn-primary btn-full" id="backupDownloadBtn">
-                <i data-lucide="save" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i> Download Backup File
+                <i data-lucide="save" class="lucide-icon icon-16"></i> Download Backup File
             </button>
         </div>
 
@@ -217,7 +219,7 @@
         <!-- Restore Section -->
         <div>
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-                <span style="font-size:20px;"><i data-lucide="download" style="width:18px;height:18px;display:inline-block;vertical-align:middle;"></i></span>
+                <span style="font-size:20px;"><i data-lucide="download" class="lucide-icon icon-18"></i></span>
                 <div>
                     <div style="font-size:14px;font-weight:600;">Restore from Backup</div>
                     <div style="font-size:12px;color:var(--muted);">Import users from a .json backup file</div>
@@ -245,7 +247,7 @@
             <div id="restoreResult" style="display:none;margin-bottom:12px;"></div>
 
             <button onclick="doRestore()" class="btn btn-danger btn-full" id="restoreBtn">
-                <i data-lucide="download" style="width:18px;height:18px;display:inline-block;vertical-align:middle;"></i> Restore Now
+                <i data-lucide="download" class="lucide-icon icon-18"></i> Restore Now
             </button>
             <p style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;">
                 ⚠️ Replace mode will delete ALL current users before importing
@@ -254,6 +256,6 @@
     </div>
 </div>
 
-<script src="static/js/app.js?v=1.2"></script>
+<script src="static/js/app.js?v=1.4"></script>
 </body>
 </html>

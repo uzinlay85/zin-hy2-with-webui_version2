@@ -24,7 +24,7 @@ lucide.createIcons();
         return `${Math.floor(secs/86400)}d ago`;
     }
 
-    function showToast(msg, icon = '<i data-lucide="check-circle" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i>') {
+    function showToast(msg, icon = '<i data-lucide="check-circle" class="lucide-icon icon-22"></i>') {
         const t = document.getElementById('toast');
         document.getElementById('toastMsg').textContent = msg;
         t.children[0].innerHTML = icon;
@@ -70,7 +70,7 @@ lucide.createIcons();
                 document.getElementById('loginOverlay').style.display = 'none';
                 fetchUsers();
             } else { err.style.display = 'block'; }
-        } catch { err.textContent = '<i data-lucide="x-circle" style="width:18px;height:18px;display:inline-block;vertical-align:middle;"></i> Connection failed'; err.style.display = 'block'; }
+        } catch { err.textContent = '<i data-lucide="x-circle" class="lucide-icon icon-18"></i> Connection failed'; err.style.display = 'block'; }
         btn.textContent = 'Sign In'; btn.disabled = false;
     }
 
@@ -146,10 +146,10 @@ lucide.createIcons();
     function getUserStatus(u) {
         const expired  = u.expire_date && new Date() > new Date(u.expire_date);
         const limitHit = u.data_limit_gb > 0 && u.data_used_bytes >= u.data_limit_gb * 1024**3;
-        if (!u.is_active) return { label: '<i data-lucide="slash" style="width:12px;height:12px;display:inline-block;vertical-align:middle;"></i> Disabled', cls: 'badge-red' };
-        if (expired)      return { label: '<i data-lucide="clock" style="width:12px;height:12px;display:inline-block;vertical-align:middle;"></i> Expired',  cls: 'badge-orange' };
-        if (limitHit)     return { label: '<i data-lucide="wifi-off" style="width:12px;height:12px;display:inline-block;vertical-align:middle;"></i> Data Limit', cls: 'badge-red' };
-        return                   { label: '<i data-lucide="check-circle" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i> Active',   cls: 'badge-green' };
+        if (!u.is_active) return { label: '<i data-lucide="slash" class="lucide-icon icon-12"></i> Disabled', cls: 'badge-red' };
+        if (expired)      return { label: '<i data-lucide="clock" class="lucide-icon icon-12"></i> Expired',  cls: 'badge-orange' };
+        if (limitHit)     return { label: '<i data-lucide="wifi-off" class="lucide-icon icon-12"></i> Data Limit', cls: 'badge-red' };
+        return                   { label: '<i data-lucide="check-circle" class="lucide-icon icon-22"></i> Active',   cls: 'badge-green' };
     }
 
     function renderUsers() {
@@ -157,7 +157,7 @@ lucide.createIcons();
         container.innerHTML = '';
 
         if (!filteredList.length) {
-            container.innerHTML = `<div class="empty-state"><div class="icon"><i data-lucide="user" style="width:32px;height:32px;display:inline-block;vertical-align:middle;"></i></div><p>No users found</p></div>`;
+            container.innerHTML = `<div class="empty-state"><div class="icon"><i data-lucide="user" class="lucide-icon icon-32"></i></div><p>No users found</p></div>`;
             return;
         }
 
@@ -230,10 +230,10 @@ lucide.createIcons();
                     </div>
                 </div>
                 <div class="list-actions">
-                    <button class="icon-btn copy" onclick="copyLink(${u.id})" title="Copy Link"><i data-lucide="link" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i></button>
-                    <button class="icon-btn reset" onclick="resetData(${u.id})" title="Reset Data"><i data-lucide="refresh-cw" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i></button>
-                    <button class="icon-btn edit" onclick="editUser(${u.id})" title="Edit"><i data-lucide="edit-3" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i></button>
-                    <button class="icon-btn del" onclick="deleteUser(${u.id})" title="Delete"><i data-lucide="trash-2" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i></button>
+                    <button class="icon-btn copy" onclick="copyLink(${u.id})" title="Copy Link"><i data-lucide="link" class="lucide-icon icon-14"></i></button>
+                    <button class="icon-btn reset" onclick="resetData(${u.id})" title="Reset Data"><i data-lucide="refresh-cw" class="lucide-icon icon-14"></i></button>
+                    <button class="icon-btn edit" onclick="editUser(${u.id})" title="Edit"><i data-lucide="edit-3" class="lucide-icon icon-14"></i></button>
+                    <button class="icon-btn del" onclick="deleteUser(${u.id})" title="Delete"><i data-lucide="trash-2" class="lucide-icon icon-14"></i></button>
                 </div>
             `;
             list.appendChild(item);
@@ -283,14 +283,14 @@ lucide.createIcons();
                     <div class="progress-fill ${pct > 85 ? 'danger' : ''}" style="width:${pct}%"></div>
                 </div>
                 <div class="meta-row">
-                    <div class="meta-item"><i data-lucide="calendar" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-top:-2px;"></i> Expires: <span>${expText}</span></div>
-                    <div class="meta-item"><i data-lucide="smartphone" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-top:-2px;"></i> Devices: <span>${devText}</span></div>
+                    <div class="meta-item"><i data-lucide="calendar" class="lucide-icon icon-14" style="margin-top:-2px"></i> Expires: <span>${expText}</span></div>
+                    <div class="meta-item"><i data-lucide="smartphone" class="lucide-icon icon-14" style="margin-top:-2px"></i> Devices: <span>${devText}</span></div>
                 </div>
                 <div class="card-actions">
-                    <button class="action-btn copy" onclick="copyLink(${u.id})" title="Copy Link"><i data-lucide="link" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i> Copy</button>
-                    <button class="action-btn reset" onclick="resetData(${u.id})" title="Reset Data"><i data-lucide="refresh-cw" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i> Reset</button>
-                    <button class="action-btn edit" onclick="editUser(${u.id})" title="Edit"><i data-lucide="edit-3" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i> Edit</button>
-                    <button class="action-btn del" onclick="deleteUser(${u.id})" title="Delete"><i data-lucide="trash-2" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i></button>
+                    <button class="action-btn copy" onclick="copyLink(${u.id})" title="Copy Link"><i data-lucide="link" class="lucide-icon icon-14"></i> Copy</button>
+                    <button class="action-btn reset" onclick="resetData(${u.id})" title="Reset Data"><i data-lucide="refresh-cw" class="lucide-icon icon-14"></i> Reset</button>
+                    <button class="action-btn edit" onclick="editUser(${u.id})" title="Edit"><i data-lucide="edit-3" class="lucide-icon icon-14"></i> Edit</button>
+                    <button class="action-btn del" onclick="deleteUser(${u.id})" title="Delete"><i data-lucide="trash-2" class="lucide-icon icon-14"></i></button>
                 </div>
             `;
             grid.appendChild(card);
@@ -304,10 +304,10 @@ lucide.createIcons();
         const u = usersList.find(x => x.id === id);
         if (!u) return;
         const domain = window.location.hostname;
-        // <i data-lucide="check-circle" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i> Universal link - app အားလုံးအတွက် (Clash Meta, Sing-box, ShadowRocket, NekoBox, V2rayN)
+        // <i data-lucide="check-circle" class="lucide-icon icon-22"></i> Universal link - app အားလုံးအတွက် (Clash Meta, Sing-box, ShadowRocket, NekoBox, V2rayN)
         const link = `hysteria2://${u.password}@${domain}:443?security=tls&obfs=salamander&obfs-password=OBFS_PASSWORD_PLACEHOLDER&fm=%7B%22quicParams%22%3A%7B%22udpHop%22%3A%7B%22ports%22%3A%2220000-50000%22%7D%7D%7D&mport=20000-50000&sni=${domain}#${u.username}`;
         navigator.clipboard.writeText(link)
-            .then(() => showToast('Link copied to clipboard!', '<i data-lucide="link" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i>'))
+            .then(() => showToast('Link copied to clipboard!', '<i data-lucide="link" class="lucide-icon icon-14"></i>'))
             .catch(() => prompt('Copy this link:', link));
     }
 
@@ -315,7 +315,7 @@ lucide.createIcons();
         if (!confirm('Reset used data to 0 for this user?')) return;
         try {
             await apiFetch(`${API_URL}/${id}/reset_data`, { method: 'POST' });
-            showToast('Data usage reset!', '<i data-lucide="refresh-cw" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i>');
+            showToast('Data usage reset!', '<i data-lucide="refresh-cw" class="lucide-icon icon-14"></i>');
             fetchUsers();
         } catch (err) { console.error(err); }
     }
@@ -325,7 +325,7 @@ lucide.createIcons();
         if (!confirm(`Delete user "${u?.username}"? This cannot be undone.`)) return;
         try {
             await apiFetch(`${API_URL}/${id}`, { method: 'DELETE' });
-            showToast('User deleted', '<i data-lucide="trash-2" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i>');
+            showToast('User deleted', '<i data-lucide="trash-2" class="lucide-icon icon-14"></i>');
             fetchUsers();
         } catch (err) { console.error(err); }
     }
@@ -379,7 +379,7 @@ lucide.createIcons();
             });
             if (res.ok) {
                 closeModal();
-                showToast(id ? 'User updated!' : 'User created!', '<i data-lucide="check-circle" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i>');
+                showToast(id ? 'User updated!' : 'User created!', '<i data-lucide="check-circle" class="lucide-icon icon-22"></i>');
                 fetchUsers();
             } else {
                 const err = await res.json();
@@ -438,11 +438,11 @@ lucide.createIcons();
             const a = document.createElement('a');
             a.href = url; a.download = filename; a.click();
             URL.revokeObjectURL(url);
-            showToast('Backup downloaded!', '<i data-lucide="save" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i>');
+            showToast('Backup downloaded!', '<i data-lucide="save" class="lucide-icon icon-16"></i>');
         } catch (err) {
             alert('Backup failed: ' + err.message);
         }
-        btn.textContent = '<i data-lucide="save" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i> Download Backup File'; btn.disabled = false;
+        btn.textContent = '<i data-lucide="save" class="lucide-icon icon-16"></i> Download Backup File'; btn.disabled = false;
     }
 
     async function doRestore() {
@@ -480,7 +480,7 @@ lucide.createIcons();
                 resultDiv.style.display = 'block';
                 resultDiv.innerHTML = `
                     <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:12px;">
-                        <div style="color:#10b981;font-weight:700;margin-bottom:4px;"><i data-lucide="check-circle" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i> Restore Complete!</div>
+                        <div style="color:#10b981;font-weight:700;margin-bottom:4px;"><i data-lucide="check-circle" class="lucide-icon icon-22"></i> Restore Complete!</div>
                         <div style="font-size:13px;color:var(--muted);">
                             Imported: <strong style="color:var(--text);">${data.imported}</strong> users &nbsp;·&nbsp;
                             Skipped: <strong style="color:var(--text);">${data.skipped}</strong> &nbsp;·&nbsp;
@@ -488,15 +488,15 @@ lucide.createIcons();
                         </div>
                     </div>`;
                 fetchUsers();
-                showToast(`Restored ${data.imported} users!`, '<i data-lucide="download" style="width:18px;height:18px;display:inline-block;vertical-align:middle;"></i>');
+                showToast(`Restored ${data.imported} users!`, '<i data-lucide="download" class="lucide-icon icon-18"></i>');
             } else {
                 resultDiv.style.display = 'block';
-                resultDiv.innerHTML = `<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:12px;color:#ef4444;"><i data-lucide="x-circle" style="width:18px;height:18px;display:inline-block;vertical-align:middle;"></i> ${data.detail || 'Restore failed'}</div>`;
+                resultDiv.innerHTML = `<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:12px;color:#ef4444;"><i data-lucide="x-circle" class="lucide-icon icon-18"></i> ${data.detail || 'Restore failed'}</div>`;
             }
         } catch (err) {
             alert('Error: ' + err.message);
         }
-        btn.textContent = '<i data-lucide="download" style="width:18px;height:18px;display:inline-block;vertical-align:middle;"></i> Restore Now'; btn.disabled = false;
+        btn.textContent = '<i data-lucide="download" class="lucide-icon icon-18"></i> Restore Now'; btn.disabled = false;
     }
 
     /* ── Online Status ── */
