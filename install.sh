@@ -151,7 +151,7 @@ cd /opt/hy2-panel
 
 # Inject generated passwords into Panel code
 sed -i "s/ADMIN_PASSWORD_PLACEHOLDER/$ADMIN_PASS/g" /opt/hy2-panel/main.py
-sed -i "s/OBFS_PASSWORD_PLACEHOLDER/$OBFS_PASS/g" /opt/hy2-panel/static/index.html
+sed -i "s/OBFS_PASSWORD_PLACEHOLDER/$OBFS_PASS/g" /opt/hy2-panel/static/js/app.js
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
