@@ -58,6 +58,8 @@ cat > /etc/systemd/system/hysteria-server.service << EOF_SVC1
 Description=Hysteria 2 Server
 After=network-online.target
 Wants=network-online.target
+StartLimitIntervalSec=60s
+StartLimitBurst=5
 
 [Service]
 Type=simple
@@ -66,8 +68,6 @@ WorkingDirectory=/etc/hysteria
 ExecStart=/usr/local/bin/hysteria server --config /etc/hysteria/config.yaml
 Restart=always
 RestartSec=5s
-StartLimitIntervalSec=60s
-StartLimitBurst=5
 
 [Install]
 WantedBy=multi-user.target
@@ -81,6 +81,8 @@ cat > /etc/systemd/system/hy2-panel.service << EOF_SVC2
 Description=Hysteria 2 Web Panel (FastAPI)
 After=network-online.target hysteria-server.service
 Wants=network-online.target
+StartLimitIntervalSec=60s
+StartLimitBurst=5
 
 [Service]
 Type=simple
@@ -89,12 +91,16 @@ WorkingDirectory=/opt/hy2-panel
 ExecStart=/opt/hy2-panel/venv/bin/uvicorn main:app --host 127.0.0.1 --port 3000
 Restart=always
 RestartSec=5s
-StartLimitIntervalSec=60s
-StartLimitBurst=5
 
 [Install]
 WantedBy=multi-user.target
 EOF_SVC2
+
+# Stop legacy hy2-api service if present and free port 3000
+systemctl stop hy2-api.service 2>/dev/null || true
+systemctl disable hy2-api.service 2>/dev/null || true
+fuser -k 3000/tcp 2>/dev/null || true
+
 echo "  ✅ hy2-panel.service updated"
 
 systemctl daemon-reload

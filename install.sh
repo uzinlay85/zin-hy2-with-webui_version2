@@ -187,6 +187,8 @@ cat << EOF_SERVICE > /etc/systemd/system/hy2-panel.service
 Description=Hysteria 2 Web Panel (FastAPI)
 After=network-online.target hysteria-server.service
 Wants=network-online.target
+StartLimitIntervalSec=60s
+StartLimitBurst=5
 
 [Service]
 Type=simple
@@ -195,12 +197,15 @@ WorkingDirectory=/opt/hy2-panel
 ExecStart=/opt/hy2-panel/venv/bin/uvicorn main:app --host 127.0.0.1 --port 3000
 Restart=always
 RestartSec=5s
-StartLimitIntervalSec=60s
-StartLimitBurst=5
 
 [Install]
 WantedBy=multi-user.target
 EOF_SERVICE
+
+# Stop legacy hy2-api service if present and free port 3000
+systemctl stop hy2-api.service 2>/dev/null || true
+systemctl disable hy2-api.service 2>/dev/null || true
+fuser -k 3000/tcp 2>/dev/null || true
 
 echo -e "\n[7/7] Configuring Nginx Reverse Proxy (/hy2-api/)..."
 cat << EOF_NGINX > /etc/nginx/sites-available/hy2-panel
