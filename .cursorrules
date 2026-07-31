@@ -1,0 +1,12 @@
+# CRITICAL INSTRUCTIONS FOR AI ASSISTANTS
+
+You are working on a highly optimized, custom-built Hysteria 2 + FastAPI VPN system. This system has been carefully tuned for maximum performance and stability (especially for mobile clients and strict DPI bypass).
+
+**BEFORE YOU PROPOSE OR MAKE ANY CHANGES TO THIS REPOSITORY, YOU MUST STRICTLY OBEY THE FOLLOWING RULES:**
+
+1. **READ THE ARCHITECTURE GUIDE:** You MUST read the `ARCHITECTURE.md` file located in the root of this repository to understand how the components (FastAPI, SQLite, Hysteria 2 API, iptables) interact.
+2. **DO NOT ALTER CORE NETWORK RULES:** Do NOT alter the UDP port hopping logic (`iptables` REDIRECT) or the Hysteria 2 `acl` rules without reading the troubleshooting section in `ARCHITECTURE.md` first. For example, never add `reject(all, udp/443)` back into the config, as it breaks HTTP/3 for mobile apps.
+3. **DO NOT BREAK DEVICE LIMITS:** Do NOT change the FastAPI background task polling logic without understanding how `last_seen` and device limits are tracked via the `127.0.0.1:8080/online` API.
+4. **NO ASSUMPTIONS:** If you see `timeout: no recent network activity` in Hysteria logs, you must know this is a NORMAL idle timeout, NOT a blocked network. Do not suggest complex network troubleshooting for this.
+
+Your primary goal is to maintain the exact architecture and stability defined in `ARCHITECTURE.md`. If you fail to follow these rules, you will break the VPN server's stability.
