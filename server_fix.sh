@@ -186,6 +186,8 @@ cd /root
 echo -e "\n[6/6] Optimizing Hysteria 2 config (QUIC Keep-Alive + Cloudflare DNS)..."
 
 if [ -f /etc/hysteria/config.yaml ]; then
+    # Update masquerade to Cloudflare if still using bing.com
+    sed -i 's|url: https://bing.com/|url: https://www.cloudflare.com/|g' /etc/hysteria/config.yaml
     if ! grep -q "keepAlivePeriod:" /etc/hysteria/config.yaml; then
         cat >> /etc/hysteria/config.yaml << 'EOF_HY2_OPT'
 

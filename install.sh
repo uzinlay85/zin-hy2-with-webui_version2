@@ -141,7 +141,7 @@ auth:
 masquerade:
   type: proxy
   proxy:
-    url: https://bing.com/
+    url: https://www.cloudflare.com/
     rewriteHost: true
 
 trafficStats:
