@@ -18,3 +18,6 @@ AI (ဉာဏ်ရည်တု) များကို အသုံးပြု�
 
 5. **[Chapter 5: 🚀 Deployment, Maintenance & Version Control](05_Deployment_and_Maintenance.md)**
    Code များကို Git/GitHub တွင် စနစ်တကျ သိမ်းဆည်းနည်းနှင့် ဆာဗာပေါ်တွင် လုံခြုံစွာ အသက်သွင်းနည်းများကို လေ့လာမည်။
+
+6. **[Chapter 6: 🎨 UI/UX Design & Premium Aesthetics](06_UI_UX_Design_and_Aesthetics.md)**
+   သုံးစွဲသူများကို ဆွဲဆောင်နိုင်မည့် ခေတ်မီလှပသော ဒီဇိုင်းများ၊ အရောင်၊ ဖောင့် နှင့် အသက်ဝင်သော Micro-animations များအကြောင်းကို လေ့လာမည်။

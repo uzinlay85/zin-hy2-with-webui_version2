@@ -1,4 +1,4 @@
-[◀️ ယခင်အခန်း (Previous Chapter)](04_AI_Collaboration_and_Best_Practices.md) | [🏠 မာတိကာ (Main Menu)](README.md)
+[◀️ ယခင်အခန်း (Previous Chapter)](04_AI_Collaboration_and_Best_Practices.md) | [🏠 မာတိကာ (Main Menu)](README.md) | [▶️ နောက်တစ်ခန်း (Next Chapter)](06_UI_UX_Design_and_Aesthetics.md)
 
 ---
 
@@ -50,4 +50,4 @@ Web App တစ်ခု ပြီးသွားရင် ပစ်ထားလ�
 *ကိုယ်ပိုင် Web Apps တွေ အများကြီး ဖန်တီးနိုင်ပါစေ! 🚀*
 
 ---
-[◀️ ယခင်အခန်း (Previous Chapter)](04_AI_Collaboration_and_Best_Practices.md) | [🏠 မာတိကာ (Main Menu)](README.md)
+[◀️ ယခင်အခန်း (Previous Chapter)](04_AI_Collaboration_and_Best_Practices.md) | [🏠 မာတိကာ (Main Menu)](README.md) | [▶️ နောက်တစ်ခန်း (Next Chapter)](06_UI_UX_Design_and_Aesthetics.md)
