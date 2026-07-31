@@ -68,7 +68,23 @@ To combat UDP blocking/throttling on standard ports, the system uses **UDP Port 
 - **Meaning**: This is **NORMAL**. The IP range `198.18.0.0/15` is reserved (RFC 2544 benchmarking / CGNAT). Some client apps try to connect to fake internal addresses. The server correctly times out since those IPs are unreachable.
 - **Action Required**: None.
 
-## 5. Migration (Backup & Restore)
+## 5. Hysteria 2 Universal Client URI Specification
+
+To ensure 100% compatibility across all Hysteria 2 client applications (NekoBox, Hiddify, V2rayN, Sing-Box, Mihomo, Clash Meta, H-UI, etc.), generated client links MUST strictly follow this exact format:
+
+### Universal Port-Hopping Format (Default / Recommended):
+`hysteria2://<username>:<password>@<domain>:443?mport=20000-50000&insecure=0&sni=<domain>#<username>`
+
+### Single-Port Standard Format:
+`hysteria2://<username>:<password>@<domain>:443?insecure=0&sni=<domain>#<username>`
+
+### Mandatory Rules for URI Generation:
+1. **NO Trailing Slash After Port**: Never include a slash `/` immediately after `:443`. Write `:443?` instead of `:443/?`. (Some client parsers like NekoBox/v2rayNG fail if a slash is present).
+2. **Explicit `insecure=0` Parameter**: Always include `insecure=0` to explicitly inform client parsers that TLS certificate verification is enabled.
+3. **Plaintext Password Usage**: The credentials in the URI MUST use the user's plaintext password (`display_password` in DB), never the bcrypt hash.
+4. **SNI Match**: The `sni` parameter MUST match the domain name associated with the SSL certificate.
+
+## 6. Migration (Backup & Restore)
 - **Method**: The Web Panel exports `users` and `admin` credentials to a JSON file.
 - **Import Modes**:
   - `Merge`: Adds new users, ignores duplicates.
