@@ -194,17 +194,21 @@ echo -e "\n[6/6] Optimizing Hysteria 2 config (QUIC Keep-Alive + Cloudflare DNS)
 if [ -f /etc/hysteria/config.yaml ]; then
     # Update masquerade to Cloudflare if still using bing.com
     sed -i 's|url: https://bing.com/|url: https://www.cloudflare.com/|g' /etc/hysteria/config.yaml
+    # Upgrade QUIC timeouts for persistent connection
+    sed -i 's|maxIdleTimeout: 30s|maxIdleTimeout: 300s|g' /etc/hysteria/config.yaml
+    sed -i 's|keepAlivePeriod: 10s|keepAlivePeriod: 5s|g' /etc/hysteria/config.yaml
+
     if ! grep -q "keepAlivePeriod:" /etc/hysteria/config.yaml; then
         cat >> /etc/hysteria/config.yaml << 'EOF_HY2_OPT'
 
-# Cellular NAT & App Stability Optimizations (Keep-Alive + DNS Resolver)
+# Cellular NAT & App Stability Optimizations (Ultra-Persistent Connection)
 quic:
   initStreamReceiveWindow: 8388608
   maxStreamReceiveWindow: 8388608
   initConnReceiveWindow: 20971520
   maxConnReceiveWindow: 20971520
-  maxIdleTimeout: 30s
-  keepAlivePeriod: 10s
+  maxIdleTimeout: 300s
+  keepAlivePeriod: 5s
 
 resolver:
   type: udp

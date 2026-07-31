@@ -147,14 +147,14 @@ masquerade:
 trafficStats:
   listen: 127.0.0.1:8080
 
-# Cellular NAT & App Stability Optimizations
+# Cellular NAT & App Stability Optimizations (Ultra-Persistent Connection)
 quic:
   initStreamReceiveWindow: 8388608
   maxStreamReceiveWindow: 8388608
   initConnReceiveWindow: 20971520
   maxConnReceiveWindow: 20971520
-  maxIdleTimeout: 30s
-  keepAlivePeriod: 10s
+  maxIdleTimeout: 300s
+  keepAlivePeriod: 5s
 
 resolver:
   type: udp
