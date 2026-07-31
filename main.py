@@ -146,7 +146,11 @@ def update_admin(request: Request, data: AdminUpdate, current_admin: str = Depen
     conn.close()
     return {"success": True}
 
-# --- Hysteria 2 Authentication Endpoint ---
+# In-memory auth cache to prevent CPU spikes from repeated client reconnections
+# {auth_str: (is_valid, username, expire_timestamp)}
+AUTH_CACHE = {}
+AUTH_CACHE_TTL = 60  # seconds
+
 @app.post("/auth")
 async def hysteria_auth(request: Request):
     """
@@ -159,7 +163,18 @@ async def hysteria_auth(request: Request):
         return JSONResponse({"ok": False, "error": "invalid json"})
     
     auth_str = data.get("auth", "")
-    
+    now = time.time()
+
+    # Fast path: check in-memory cache first (prevents CPU spikes on reconnects)
+    if auth_str in AUTH_CACHE:
+        cached_valid, cached_user, exp = AUTH_CACHE[auth_str]
+        if now < exp:
+            if not cached_valid:
+                return JSONResponse({"ok": False, "error": "user not found or wrong password"})
+            # Re-verify active status & limits lightweight if needed, or pass
+            username = cached_user
+            return JSONResponse({"ok": True, "id": username})
+
     conn = get_db()
     c = conn.cursor()
     
@@ -171,51 +186,54 @@ async def hysteria_auth(request: Request):
         c.execute("SELECT * FROM users WHERE username = ? AND role != 'admin'", (username,))
         user = c.fetchone()
     else:
-        # Password-only auth: search by username match after verifying password
-        # We must fetch all users and verify with bcrypt (can't SQL-match hashed passwords)
         input_password = auth_str
-        c.execute("SELECT * FROM users WHERE role != 'admin'")
-        all_users = c.fetchall()
-        for candidate in all_users:
-            db_pw = candidate["password"]
-            if db_pw.startswith("$2b$") or db_pw.startswith("$2a$"):
-                try:
-                    if bcrypt.checkpw(input_password.encode('utf-8'), db_pw.encode('utf-8')):
-                        user = candidate
-                        break
-                except Exception:
-                    continue
-            else:
-                # Plaintext fallback (will be upgraded below)
-                if db_pw == input_password:
-                    user = candidate
-                    break
+        # Fast SQL check using display_password or plaintext password
+        c.execute("SELECT * FROM users WHERE (display_password = ? OR password = ?) AND role != 'admin'", 
+                  (input_password, input_password))
+        user = c.fetchone()
+        
+        # Fallback: if not found by direct match, search hashed passwords only
+        if not user:
+            c.execute("SELECT * FROM users WHERE role != 'admin'")
+            all_users = c.fetchall()
+            for candidate in all_users:
+                db_pw = candidate["password"]
+                if db_pw.startswith("$2b$") or db_pw.startswith("$2a$"):
+                    try:
+                        if bcrypt.checkpw(input_password.encode('utf-8'), db_pw.encode('utf-8')):
+                            user = candidate
+                            break
+                    except Exception:
+                        continue
     
     if not user:
         conn.close()
+        AUTH_CACHE[auth_str] = (False, "", now + AUTH_CACHE_TTL)
         return JSONResponse({"ok": False, "error": "user not found or wrong password"})
     
-    # --- Transparent Password Upgrade (Plaintext → bcrypt) ---
-    # If password is still plaintext, verify & upgrade to bcrypt on first successful auth
+    # Password verification (Fast path: O(1) string check on display_password)
     db_password = user["password"]
+    display_pw = user["display_password"]
     is_valid = False
-    if db_password.startswith("$2b$") or db_password.startswith("$2a$"):
+
+    if display_pw and display_pw == input_password:
+        is_valid = True
+    elif db_password == input_password:
+        # Plaintext match - upgrade to bcrypt hash
+        is_valid = True
+        new_hash = bcrypt.hashpw(input_password.encode('utf-8'), bcrypt.gensalt(rounds=10)).decode('utf-8')
+        c.execute("UPDATE users SET password = ?, display_password = ? WHERE id = ?",
+                  (new_hash, input_password, user["id"]))
+        conn.commit()
+    elif db_password.startswith("$2b$") or db_password.startswith("$2a$"):
         try:
             is_valid = bcrypt.checkpw(input_password.encode('utf-8'), db_password.encode('utf-8'))
         except Exception:
             is_valid = False
-    else:
-        # Plaintext - verify and upgrade to bcrypt on first successful auth
-        if db_password == input_password:
-            is_valid = True
-            new_hash = bcrypt.hashpw(input_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-            # Save bcrypt hash AND save original password to display_password for URI generation
-            c.execute("UPDATE users SET password = ?, display_password = ? WHERE id = ?",
-                      (new_hash, input_password, user["id"]))
-            conn.commit()
-    
+
     if not is_valid:
         conn.close()
+        AUTH_CACHE[auth_str] = (False, "", now + AUTH_CACHE_TTL)
         return JSONResponse({"ok": False, "error": "user not found or wrong password"})
         
     username = user["username"]  # Get username for tracking
@@ -228,7 +246,6 @@ async def hysteria_auth(request: Request):
     if user["expire_date"]:
         try:
             exp_date = datetime.datetime.fromisoformat(user["expire_date"].replace('Z', '+00:00'))
-            # Naive comparison fallback if no tzinfo
             if exp_date.tzinfo is None:
                 if datetime.datetime.now() > exp_date:
                     conn.close()
@@ -262,9 +279,9 @@ async def hysteria_auth(request: Request):
                         return JSONResponse({"ok": False, "error": "device limit reached"})
         except Exception as e:
             print(f"Error checking online devices: {e}")
-            # Allow if we can't check
-            
-    # Success! Return the username as the ID so Hysteria tracks it by username
+
+    # Success! Cache the result for 60s to prevent CPU load on frequent reconnections
+    AUTH_CACHE[auth_str] = (True, username, now + AUTH_CACHE_TTL)
     return JSONResponse({"ok": True, "id": username})
 
 # --- Management API (For Web Panel) ---
@@ -428,6 +445,7 @@ def add_user(user: UserCreate, admin: str = Depends(get_current_admin)):
         """, (user.username, hashed_password, user.password,
                user.data_limit_gb, user.expire_date, user.device_limit, user.is_active))
         conn.commit()
+        AUTH_CACHE.clear()
     except sqlite3.IntegrityError:
         conn.close()
         raise HTTPException(status_code=400, detail="Username already exists")
