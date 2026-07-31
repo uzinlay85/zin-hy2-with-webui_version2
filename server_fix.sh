@@ -195,9 +195,8 @@ if [ -f /etc/hysteria/config.yaml ]; then
     # Update masquerade to Cloudflare if still using bing.com
     sed -i 's|url: https://bing.com/|url: https://www.cloudflare.com/|g' /etc/hysteria/config.yaml
     # Upgrade QUIC timeouts for persistent connection (max 120s allowed by Hysteria 2)
-    sed -i 's|maxIdleTimeout: 300s|maxIdleTimeout: 120s|g' /etc/hysteria/config.yaml
-    sed -i 's|maxIdleTimeout: 30s|maxIdleTimeout: 120s|g' /etc/hysteria/config.yaml
-    sed -i 's|keepAlivePeriod: 10s|keepAlivePeriod: 5s|g' /etc/hysteria/config.yaml
+    sed -i 's|maxIdleTimeout:.*|maxIdleTimeout: 120s|g' /etc/hysteria/config.yaml
+    sed -i 's|keepAlivePeriod:.*|keepAlivePeriod: 5s|g' /etc/hysteria/config.yaml
 
     if ! grep -q "keepAlivePeriod:" /etc/hysteria/config.yaml; then
         cat >> /etc/hysteria/config.yaml << 'EOF_HY2_OPT'
