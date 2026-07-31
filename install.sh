@@ -59,6 +59,9 @@ echo -e "\n[3/7] Configuring UDP Port Hopping (UFW NAT)..."
 if ! grep -q "20000:50000.*REDIRECT" /etc/ufw/before.rules; then
     sed -i '/^\*filter/i *nat\n:PREROUTING ACCEPT [0:0]\n-A PREROUTING -p udp --dport 20000:50000 -m conntrack ! --ctstate ESTABLISHED,RELATED -j REDIRECT --to-port 443\nCOMMIT\n' /etc/ufw/before.rules
 fi
+# Clean up duplicate rules in active memory before reloading
+while iptables -t nat -D PREROUTING -p udp --dport 20000:50000 -j REDIRECT --to-port 443 2>/dev/null; do :; done
+while iptables -t nat -D PREROUTING -p udp --dport 20000:50000 -m conntrack ! --ctstate ESTABLISHED,RELATED -j REDIRECT --to-port 443 2>/dev/null; do :; done
 ufw --force enable
 ufw reload
 
