@@ -2,6 +2,10 @@
 
 Fast, Secure, and Automated Hysteria 2 VPN Server setup with a feature-rich, modern Web Panel for User Management.
 
+> **📚 အထူးလက်ဆောင်:** AI (ဉာဏ်ရည်တု) များကို အသုံးပြု၍ ကိုယ်ပိုင် Web App များကို ပရော်ဖက်ရှင်နယ်ကျကျ မည်သို့ရေးသားရမည်ကို လေ့လာလိုပါက **[AI-Assisted Web Dev Masterclass (Myanmar)](docs/ai_masterclass/)** လမ်းညွှန်စာအုပ်တွင် အသေးစိတ် ဝင်ရောက်ဖတ်ရှုနိုင်ပါသည်။
+
+---
+
 ## ✨ အသစ်ပါဝင်လာသော စနစ်များ (Major Features)
 - 🚀 **One-Click Setup:** Code တစ်ကြောင်းတည်း Run ရုံဖြင့် Hysteria 2 + Web Panel + SSL အစုံအလင် တပ်ဆင်ပေးခြင်း။
 - 🌍 **Advanced Anti-Censorship (Obfuscation):** Salamander Obfuscation စနစ်ကို အလိုအလျောက် ထည့်သွင်းပေးထားသောကြောင့် တင်းကျပ်သော DPI (ဥပမာ - MPT/Ooredoo) ပိတ်ဆို့မှုများကို အလွယ်တကူ ကျော်ဖြတ်နိုင်ပြီး V2rayN, NekoBox, Sing-box အစရှိသည့် App အားလုံးတွင် ချိတ်ဆက်အသုံးပြုနိုင်ပါသည်။
