@@ -68,6 +68,22 @@ journalctl -u hysteria-server.service -f
 ```
 *(Live ကြည့်နေသည်ကို ရပ်တန့်လိုပါက Keyboard မှ **`Ctrl + C`** ကို နှိပ်ပါ။)*
 
+**📊 ဆာဗာ၏ လုပ်ဆောင်နိုင်စွမ်းကို ဂရပ်ဖစ်ဖြင့် ရှင်းလင်းစွာ ကြည့်ရှုရန် (System Monitoring):**
+`htop` ထက် ပိုမိုလှပရှင်းလင်းပြီး Data အပြည့်အစုံကို လွယ်ကူစွာကြည့်ရှုလိုပါက **btop** (သို့) **glances** ကို အသုံးပြုနိုင်ပါသည်။
+
+*   **`btop` သွင်းနည်း (အထူး အကြံပြုပါသည်):**
+    ```bash
+    apt update && apt install btop -y
+    btop
+    ```
+    *(CPU, RAM, Network အဝင်/အထွက် များကို အရောင်များ၊ ဂရပ်များဖြင့် အလွန်ရှင်းလင်းစွာ ပြသပေးပြီး Mouse ဖြင့်လည်း ထိန်းချုပ်နိုင်ပါသည်။)*
+
+*   **`glances` သွင်းနည်း (အချက်အလက် စုံလင်စွာ ကြည့်လိုပါက):**
+    ```bash
+    apt update && apt install glances -y
+    glances
+    ```
+
 ---
 
 ## 💾 ၄။ Backup & Restore ပြုလုပ်နည်း (Data Migration)
