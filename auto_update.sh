@@ -56,9 +56,10 @@ else
         fi
 
         if [ -n "$HY2_ARCH" ]; then
+            systemctl stop hysteria-server.service
             wget -qO /usr/local/bin/hysteria "https://github.com/apernet/hysteria/releases/latest/download/hysteria-linux-${HY2_ARCH}"
             chmod +x /usr/local/bin/hysteria
-            systemctl restart hysteria-server.service
+            systemctl start hysteria-server.service
             echo "✅ Hysteria 2 successfully updated to $LATEST_VERSION."
         fi
     else
