@@ -1,3 +1,7 @@
+[◀️ ယခင်အခန်း (Previous Chapter)](01_System_Architecture_and_Databases.md) | [🏠 မာတိကာ (Main Menu)](README.md) | [▶️ နောက်တစ်ခန်း (Next Chapter)](03_Comprehensive_Security.md)
+
+---
+
 # Chapter 2: 🔌 API Design & Communication
 
 Web App တွေမှာ Frontend နဲ့ Backend က ဘာသာစကားမတူပါဘူး။ နေရာလည်း မတူပါဘူး။ သူတို့နှစ်ခုကြား နားလည်အောင် စကားပြန်ပေးတာကို **API (Application Programming Interface)** လို့ ခေါ်ပါတယ်။
@@ -52,3 +56,6 @@ AI ကို API ရေးခိုင်းတဲ့အခါ - *"User add တ�
 API တွေကို အကာအကွယ်မရှိ လွှင့်ထားလို့ မရပါဘူး။
 - **CORS (Cross-Origin Resource Sharing):** သင့် API ကို တခြား Domain ကနေ လှမ်းခေါ်လို့ရမလား သတ်မှတ်တာပါ။ (ဥပမာ - `example.com` က API ကို `hacker.com` ကနေ လှမ်းခေါ်ရင် Browser က ပိတ်ချလိုက်တာမျိုးပါ)။
 - **Auth Tokens:** `/api/users` ကို ခေါ်ချင်ရင် Token ပါမှ ခေါ်ခွင့်ပြုရပါမယ်။ (ကျွန်တော်တို့ ပရောဂျက်မှာ Basic Auth Token ကို Session Storage မှာ သိမ်းထားပြီး ခေါ်တိုင်း ထည့်ပို့ပေးပါတယ်)။
+
+---
+[◀️ ယခင်အခန်း (Previous Chapter)](01_System_Architecture_and_Databases.md) | [🏠 မာတိကာ (Main Menu)](README.md) | [▶️ နောက်တစ်ခန်း (Next Chapter)](03_Comprehensive_Security.md)

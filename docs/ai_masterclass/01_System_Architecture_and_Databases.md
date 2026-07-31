@@ -1,3 +1,7 @@
+[🏠 မာတိကာသို့ ပြန်သွားရန် (Main Menu)](README.md) | [▶️ နောက်တစ်ခန်း (Next Chapter)](02_API_Design_and_Communication.md)
+
+---
+
 # Chapter 1: 🏗️ System Architecture & Databases
 
 Web App တစ်ခုကို မစတင်ခင် အရေးကြီးဆုံးက သူ့ရဲ့ ဖွဲ့စည်းပုံ (Architecture) ကို မြင်ယောင်တတ်ဖို့ပါ။ အိမ်တစ်လုံးဆောက်တဲ့အခါ အုတ်မြစ်၊ နံရံ၊ အမိုး ခွဲခြားစဉ်းစားရသလိုပါပဲ။
@@ -55,3 +59,6 @@ Database တွေ အများကြီးရှိတဲ့အထဲက က
    Frontend ကနေ Database ဆီကို တိုက်ရိုက်ချိတ်တာမျိုး ဘယ်တော့မှ (လုံးဝ) မလုပ်ရပါဘူး။ ကြားခံ Backend (API) ကနေပဲ သွားရပါမယ်။
 
 *(နောက်အခန်း Chapter 2 တွင် Frontend နှင့် Backend မည်သို့ စကားပြောကြသလဲ (API) အကြောင်းကို ဆက်လက်လေ့လာပါမည်။)*
+
+---
+[🏠 မာတိကာသို့ ပြန်သွားရန် (Main Menu)](README.md) | [▶️ နောက်တစ်ခန်း (Next Chapter)](02_API_Design_and_Communication.md)

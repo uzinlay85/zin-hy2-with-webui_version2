@@ -1,3 +1,7 @@
+[◀️ ယခင်အခန်း (Previous Chapter)](02_API_Design_and_Communication.md) | [🏠 မာတိကာ (Main Menu)](README.md) | [▶️ နောက်တစ်ခန်း (Next Chapter)](04_AI_Collaboration_and_Best_Practices.md)
+
+---
+
 # Chapter 3: 🛡️ Comprehensive Security (Security-First Mindset)
 
 Security ဆိုတာ App ကြီးတစ်ခုလုံး ပြီးသွားမှ နောက်ဆုံးမှ ဆေးသုတ်သလို သုတ်ရတဲ့အရာ မဟုတ်ပါဘူး။ ပရောဂျက် စလုပ်ကတည်းက အုတ်မြစ်ထဲမှာ ထည့်တည်ဆောက်ရမယ့် (Security-First Mindset) အရာဖြစ်ပါတယ်။
@@ -42,3 +46,6 @@ Web App လုံခြုံရုံနဲ့ မရပါဘူး။ Web App
 3. **Fail2Ban:** မှားယွင်းတဲ့ Password တွေ ဆက်တိုက် ရိုက်သွင်းသူတွေကို အလိုအလျောက် IP Block ပေးတဲ့ `fail2ban` ကို သွင်းထားပါ။
 
 (လုံခြုံရေးဆိုတာ ၁၀၀% စိတ်ချရတယ်ဆိုတာ မရှိပါဘူး။ ဒါပေမယ့် Hacker တွေ လက်လျှော့သွားလောက်အောင် ခက်ခဲအောင် လုပ်ထားလို့ ရပါတယ်။)
+
+---
+[◀️ ယခင်အခန်း (Previous Chapter)](02_API_Design_and_Communication.md) | [🏠 မာတိကာ (Main Menu)](README.md) | [▶️ နောက်တစ်ခန်း (Next Chapter)](04_AI_Collaboration_and_Best_Practices.md)

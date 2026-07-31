@@ -1,3 +1,7 @@
+[◀️ ယခင်အခန်း (Previous Chapter)](03_Comprehensive_Security.md) | [🏠 မာတိကာ (Main Menu)](README.md) | [▶️ နောက်တစ်ခန်း (Next Chapter)](05_Deployment_and_Maintenance.md)
+
+---
+
 # Chapter 4: 🤖 AI Collaboration & Best Practices
 
 AI တွေ (ChatGPT, Claude, Cursor) က Code ရေးတဲ့ နေရာမှာ အံ့မခန်း မြန်ဆန်ပါတယ်။ ဒါပေမယ့် သူတို့ဟာ သင် ခိုင်းသလောက်ပဲ လုပ်ပေးနိုင်တဲ့ အလုပ်သမားတွေ (Junior Developers) ပါ။ ကောင်းမွန်တဲ့ Web App တစ်ခု ထွက်လာဖို့ဆိုရင် သင်ကိုယ်တိုင်က ပြတ်သားတဲ့ ဦးဆောင်သူ (Senior Developer) တစ်ယောက်လို တွေးခေါ်ခိုင်းစေတတ်ဖို့ လိုပါတယ်။
@@ -44,3 +48,6 @@ AI က ရေးပေးတိုင်း ယူမသုံးပါနဲ့
 AI တွေ (ဥပမာ Cursor) မှာ သင့်ပရောဂျက်ရဲ့ အကြောင်းကို အမြဲတမ်း မှတ်မိနေအောင် `.cursorrules` (သို့) `ARCHITECTURE.md` လို ဖိုင်တွေ ဖန်တီးပေးထားသင့်ပါတယ်။
 
 - အဲဒီဖိုင်တွေထဲမှာ သင့်ပရောဂျက်က ဘာ Database သုံးလဲ၊ ဘာ Library သုံးလဲ၊ လုံခြုံရေးအတွက် ဘာတွေ အမြဲစစ်ဆေးရမလဲ ဆိုတာကို ရေးထားလိုက်ရင် AI ဟာ ခိုင်းတိုင်း ခိုင်းတိုင်း အဲဒီဖိုင်ကို အရင်ဖတ်ပြီးမှ အလုပ်လုပ်တဲ့အတွက် အခြေခံအမှားတွေ လုံးဝ (လုံးဝ) ထပ်မလုပ်တော့ပါဘူး။
+
+---
+[◀️ ယခင်အခန်း (Previous Chapter)](03_Comprehensive_Security.md) | [🏠 မာတိကာ (Main Menu)](README.md) | [▶️ နောက်တစ်ခန်း (Next Chapter)](05_Deployment_and_Maintenance.md)
