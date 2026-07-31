@@ -37,6 +37,8 @@ net.core.default_qdisc=fq
 net.ipv4.tcp_congestion_control=bbr
 net.ipv4.ip_forward=1
 net.ipv4.tcp_fastopen=3
+net.core.rmem_max=8388608
+net.core.wmem_max=8388608
 EOF_SYSCTL
     sysctl -p
 fi
@@ -53,9 +55,9 @@ ufw deny out 465/tcp
 ufw deny out 587/tcp
 
 echo -e "\n[3/7] Configuring UDP Port Hopping (UFW NAT)..."
-# Add NAT rules to UFW before.rules for port hopping
-if ! grep -q "20000:50000 -j REDIRECT" /etc/ufw/before.rules; then
-    sed -i '/^\*filter/i *nat\n:PREROUTING ACCEPT [0:0]\n-A PREROUTING -p udp --dport 20000:50000 -j REDIRECT --to-port 443\nCOMMIT\n' /etc/ufw/before.rules
+# Add NAT rules to UFW before.rules for port hopping (with conntrack to prevent drops)
+if ! grep -q "20000:50000.*REDIRECT" /etc/ufw/before.rules; then
+    sed -i '/^\*filter/i *nat\n:PREROUTING ACCEPT [0:0]\n-A PREROUTING -p udp --dport 20000:50000 -m conntrack ! --ctstate ESTABLISHED,RELATED -j REDIRECT --to-port 443\nCOMMIT\n' /etc/ufw/before.rules
 fi
 ufw --force enable
 ufw reload

@@ -305,7 +305,7 @@ lucide.createIcons();
         if (!u) return;
         const domain = window.location.hostname;
         // <i data-lucide="check-circle" class="lucide-icon icon-22"></i> Universal link - app အားလုံးအတွက် (Clash Meta, Sing-box, ShadowRocket, NekoBox, V2rayN)
-        const link = `hy2://${u.password}@${domain}:443/?mport=20000-50000&sni=${domain}#${u.username}`;
+        const link = `hysteria2://${u.username}:${u.password}@${domain}:443/?mport=20000-50000&sni=${domain}#${u.username}`;
         navigator.clipboard.writeText(link)
             .then(() => showToast('Link copied to clipboard!', '<i data-lucide="link" class="lucide-icon icon-14"></i>'))
             .catch(() => prompt('Copy this link:', link));
