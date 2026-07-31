@@ -315,8 +315,8 @@ lucide.createIcons();
         const u = usersList.find(x => x.id === id);
         if (!u) return;
         const domain = window.location.hostname;
-        // <i data-lucide="check-circle" class="lucide-icon icon-22"></i> Universal link - app အားလုံးအတွက် (Clash Meta, Sing-box, ShadowRocket, NekoBox, V2rayN)
-        const link = `hysteria2://${u.username}:${u.password}@${domain}:443/?mport=20000-50000&sni=${domain}#${u.username}`;
+        // Universal 100% compatible link for all apps (NekoBox, Hiddify, V2rayN, Sing-box, Clash Meta)
+        const link = `hysteria2://${u.username}:${u.password}@${domain}:443?mport=20000-50000&insecure=0&sni=${domain}#${u.username}`;
         navigator.clipboard.writeText(link)
             .then(() => showToast('Link copied to clipboard!', '<i data-lucide="link" class="lucide-icon icon-14"></i>'))
             .catch(() => prompt('Copy this link:', link));
