@@ -1,4 +1,4 @@
-[◀️ ယခင်အခန်း (Previous Chapter)](05_Deployment_and_Maintenance.md) | [🏠 မာတိကာ (Main Menu)](README.md)
+[◀️ ယခင်အခန်း (Previous Chapter)](05_Deployment_and_Maintenance.md) | [🏠 မာတိကာ (Main Menu)](README.md) | [▶️ နောက်တစ်ခန်း (Next Chapter)](07_Ultimate_AI_Prompt_Template.md)
 
 ---
 
@@ -46,4 +46,4 @@ AI ကို Frontend Code ရေးခိုင်းတဲ့အခါ အေ�
 UI/UX ဆိုတာ သုံးစွဲသူကို **"Wow"** ဖြစ်သွားစေဖို့ပါ။ အသေးအမွှားလေးတွေဖြစ်တဲ့ အရောင်၊ ဖောင့်၊ လှုပ်ရှားမှုလေးတွေက အစ သေချာ ဂရုစိုက်ပေးရင် သင့်ရဲ့ Web App ဟာ နိုင်ငံတကာအဆင့်မီ Enterprise-grade App တစ်ခု ဖြစ်လာမှာ အသေအချာပါပဲ ခင်ဗျာ! 🚀
 
 ---
-[◀️ ယခင်အခန်း (Previous Chapter)](05_Deployment_and_Maintenance.md) | [🏠 မာတိကာ (Main Menu)](README.md)
+[◀️ ယခင်အခန်း (Previous Chapter)](05_Deployment_and_Maintenance.md) | [🏠 မာတိကာ (Main Menu)](README.md) | [▶️ နောက်တစ်ခန်း (Next Chapter)](07_Ultimate_AI_Prompt_Template.md)

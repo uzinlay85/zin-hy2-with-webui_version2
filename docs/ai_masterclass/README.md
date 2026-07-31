@@ -21,3 +21,6 @@ AI (ဉာဏ်ရည်တု) များကို အသုံးပြု�
 
 6. **[Chapter 6: 🎨 UI/UX Design & Premium Aesthetics](06_UI_UX_Design_and_Aesthetics.md)**
    သုံးစွဲသူများကို ဆွဲဆောင်နိုင်မည့် ခေတ်မီလှပသော ဒီဇိုင်းများ၊ အရောင်၊ ဖောင့် နှင့် အသက်ဝင်သော Micro-animations များအကြောင်းကို လေ့လာမည်။
+
+7. **[Chapter 7: 📝 The Ultimate AI Prompt Template](07_Ultimate_AI_Prompt_Template.md)**
+   Web App အသစ်တစ်ခု စတင်ရေးသားတော့မည်ဆိုပါက AI အား ပထမဆုံး စတင်ခိုင်းစေရမည့် (Eng/MM) အကောင်းဆုံး Prompt နမူနာနှင့် အသုံးပြုနည်း။
