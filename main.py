@@ -66,11 +66,19 @@ def init_db():
     except Exception:
         pass  # Column already exists
     
+    # Auto-migration: Restore plaintext password from display_password if password holds bcrypt hash
+    try:
+        c.execute("UPDATE users SET password = display_password WHERE display_password IS NOT NULL AND display_password != '' AND (password LIKE '$2b$%' OR password LIKE '$2a$%')")
+        conn.commit()
+    except Exception:
+        pass
+
     # Create default admin if not exists
     c.execute("SELECT * FROM users WHERE role='admin'")
     if not c.fetchone():
+        hashed_admin_pass = bcrypt.hashpw("ADMIN_PASSWORD_PLACEHOLDER".encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         c.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", 
-                  ("admin", "ADMIN_PASSWORD_PLACEHOLDER", "admin"))
+                  ("admin", hashed_admin_pass, "admin"))
     conn.commit()
     conn.close()
 
@@ -189,49 +197,28 @@ async def hysteria_auth(request: Request):
         user = c.fetchone()
     else:
         input_password = auth_str
-        # Fast SQL check using display_password or plaintext password
-        c.execute("SELECT * FROM users WHERE (display_password = ? OR password = ?) AND role != 'admin'", 
+        # Fast direct SQL check using password or display_password
+        c.execute("SELECT * FROM users WHERE (password = ? OR display_password = ?) AND role != 'admin'", 
                   (input_password, input_password))
         user = c.fetchone()
-        
-        # Fallback: if not found by direct match, search hashed passwords only
-        if not user:
-            c.execute("SELECT * FROM users WHERE role != 'admin'")
-            all_users = c.fetchall()
-            for candidate in all_users:
-                db_pw = candidate["password"]
-                if db_pw.startswith("$2b$") or db_pw.startswith("$2a$"):
-                    try:
-                        if bcrypt.checkpw(input_password.encode('utf-8'), db_pw.encode('utf-8')):
-                            user = candidate
-                            break
-                    except Exception:
-                        continue
     
     if not user:
         conn.close()
         AUTH_CACHE[auth_str] = (False, "", now + AUTH_CACHE_FAILURE_TTL)
         return JSONResponse({"ok": False, "error": "user not found or wrong password"})
     
-    # Password verification (Fast path: O(1) string check on display_password)
+    # Password verification (Fast path: O(1) string check)
     db_password = user["password"]
     display_pw = user["display_password"]
-    is_valid = False
+    is_valid = (input_password == db_password) or (display_pw and input_password == display_pw)
 
-    if display_pw and display_pw == input_password:
-        is_valid = True
-    elif db_password == input_password:
-        # Plaintext match - upgrade to bcrypt hash
-        is_valid = True
-        new_hash = bcrypt.hashpw(input_password.encode('utf-8'), bcrypt.gensalt(rounds=10)).decode('utf-8')
-        c.execute("UPDATE users SET password = ?, display_password = ? WHERE id = ?",
-                  (new_hash, input_password, user["id"]))
-        conn.commit()
-    elif db_password.startswith("$2b$") or db_password.startswith("$2a$"):
+    # Legacy fallback: if user still has bcrypt hash in password column, verify once & update to plaintext
+    if not is_valid and (db_password.startswith("$2b$") or db_password.startswith("$2a$")):
         try:
-            is_valid = bcrypt.checkpw(input_password.encode('utf-8'), db_password.encode('utf-8'))
-            if is_valid and not display_pw:
-                c.execute("UPDATE users SET display_password = ? WHERE id = ?", (input_password, user["id"]))
+            if bcrypt.checkpw(input_password.encode('utf-8'), db_password.encode('utf-8')):
+                is_valid = True
+                c.execute("UPDATE users SET password = ?, display_password = ? WHERE id = ?",
+                          (input_password, input_password, user["id"]))
                 conn.commit()
         except Exception:
             is_valid = False
@@ -440,12 +427,11 @@ def add_user(user: UserCreate, admin: str = Depends(get_current_admin)):
     conn = get_db()
     c = conn.cursor()
     try:
-        # Store original password for URI display, bcrypt hash for authentication
-        hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        # Store password directly in both password and display_password for instant O(1) auth
         c.execute("""
             INSERT INTO users (username, password, display_password, data_limit_gb, expire_date, device_limit, is_active)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (user.username, hashed_password, user.password,
+        """, (user.username, user.password, user.password,
                user.data_limit_gb, user.expire_date, user.device_limit, user.is_active))
         conn.commit()
         AUTH_CACHE.clear()
@@ -459,32 +445,15 @@ def add_user(user: UserCreate, admin: str = Depends(get_current_admin)):
 def update_user(user_id: int, user: UserCreate, admin: str = Depends(get_current_admin)):
     conn = get_db()
     c = conn.cursor()
-    # Check if password is being changed (not already hashed)
-    if user.password and not (user.password.startswith("$2b$") or user.password.startswith("$2a$")):
-        # New plaintext password: hash for auth, keep original for display/URI
-        new_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        display_pw = user.password
-    else:
-        # Already hashed (e.g., from legacy path): keep hash, don't touch display_password
-        new_password = user.password
-        display_pw = None  # Will use COALESCE to keep existing display_password in DB
-    
-    if display_pw is not None:
-        c.execute("""
-            UPDATE users SET username=?, password=?, display_password=?,
-                             data_limit_gb=?, expire_date=?, device_limit=?, is_active=?
-            WHERE id=? AND role != 'admin'
-        """, (user.username, new_password, display_pw,
-               user.data_limit_gb, user.expire_date, user.device_limit, user.is_active, user_id))
-    else:
-        c.execute("""
-            UPDATE users SET username=?, password=?,
-                             data_limit_gb=?, expire_date=?, device_limit=?, is_active=?
-            WHERE id=? AND role != 'admin'
-        """, (user.username, new_password,
-               user.data_limit_gb, user.expire_date, user.device_limit, user.is_active, user_id))
+    c.execute("""
+        UPDATE users SET username=?, password=?, display_password=?,
+                         data_limit_gb=?, expire_date=?, device_limit=?, is_active=?
+        WHERE id=? AND role != 'admin'
+    """, (user.username, user.password, user.password,
+           user.data_limit_gb, user.expire_date, user.device_limit, user.is_active, user_id))
     conn.commit()
     conn.close()
+    AUTH_CACHE.clear()
     return {"success": True}
 
 from fastapi import BackgroundTasks
