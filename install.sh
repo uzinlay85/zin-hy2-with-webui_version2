@@ -37,8 +37,12 @@ net.core.default_qdisc=fq
 net.ipv4.tcp_congestion_control=bbr
 net.ipv4.ip_forward=1
 net.ipv4.tcp_fastopen=3
-net.core.rmem_max=8388608
-net.core.wmem_max=8388608
+# High-performance UDP buffers for QUIC/Hysteria2 (64MB)
+net.core.rmem_max=67108864
+net.core.wmem_max=67108864
+net.core.rmem_default=4194304
+net.core.wmem_default=4194304
+net.ipv4.udp_mem=8388608 16777216 33554432
 EOF_SYSCTL
     sysctl -p
 fi
@@ -83,7 +87,10 @@ chmod +x /usr/local/bin/hysteria
 cat << EOF_HY2_SERVICE > /etc/systemd/system/hysteria-server.service
 [Unit]
 Description=Hysteria 2 Server
-After=network.target
+# Wait for full network stack (DNS resolution + IP) before starting
+# This prevents TLS cert path failures on reboot
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=simple
@@ -91,6 +98,11 @@ User=root
 WorkingDirectory=/etc/hysteria
 ExecStart=/usr/local/bin/hysteria server --config /etc/hysteria/config.yaml
 Restart=always
+# Delay restart to prevent crash loops on config errors
+RestartSec=5s
+# Limit rapid restart attempts
+StartLimitIntervalSec=60s
+StartLimitBurst=5
 
 [Install]
 WantedBy=multi-user.target
@@ -154,7 +166,8 @@ pip install -r requirements.txt
 cat << EOF_SERVICE > /etc/systemd/system/hy2-panel.service
 [Unit]
 Description=Hysteria 2 Web Panel (FastAPI)
-After=network.target hysteria-server.service
+After=network-online.target hysteria-server.service
+Wants=network-online.target
 
 [Service]
 Type=simple
@@ -162,6 +175,9 @@ User=root
 WorkingDirectory=/opt/hy2-panel
 ExecStart=/opt/hy2-panel/venv/bin/uvicorn main:app --host 127.0.0.1 --port 3000
 Restart=always
+RestartSec=5s
+StartLimitIntervalSec=60s
+StartLimitBurst=5
 
 [Install]
 WantedBy=multi-user.target
@@ -182,9 +198,19 @@ server {
     ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
 
-    # Basic SSL configs
+    # SSL Performance & Security
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    # Cache SSL sessions to avoid repeated handshakes (10MB ≈ 40,000 sessions)
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    ssl_session_tickets off;
+
+    # Security headers
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
+    add_header Referrer-Policy no-referrer;
 
     location /hy2-api/ {
         proxy_pass http://127.0.0.1:3000/;
@@ -192,6 +218,11 @@ server {
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
+        # WebSocket support (for future real-time features)
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 86400;
     }
     
     # Redirect root to /hy2-api/ for convenience, or leave it for other panels (e.g. 3x-ui)

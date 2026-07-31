@@ -157,23 +157,63 @@ async def hysteria_auth(request: Request):
     conn = get_db()
     c = conn.cursor()
     
+    user = None
+    input_password = ""
+    
     if ":" in auth_str:
-        username, password = auth_str.split(":", 1)
-        c.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
+        username, input_password = auth_str.split(":", 1)
+        c.execute("SELECT * FROM users WHERE username = ? AND role != 'admin'", (username,))
+        user = c.fetchone()
     else:
-        # Password only auth
-        password = auth_str
-        c.execute("SELECT * FROM users WHERE password = ?", (password,))
-        
-    user = c.fetchone()
-    conn.close()
+        # Password-only auth: search by username match after verifying password
+        # We must fetch all users and verify with bcrypt (can't SQL-match hashed passwords)
+        input_password = auth_str
+        c.execute("SELECT * FROM users WHERE role != 'admin'")
+        all_users = c.fetchall()
+        for candidate in all_users:
+            db_pw = candidate["password"]
+            if db_pw.startswith("$2b$") or db_pw.startswith("$2a$"):
+                try:
+                    if bcrypt.checkpw(input_password.encode('utf-8'), db_pw.encode('utf-8')):
+                        user = candidate
+                        break
+                except Exception:
+                    continue
+            else:
+                # Plaintext fallback (will be upgraded below)
+                if db_pw == input_password:
+                    user = candidate
+                    break
     
     if not user:
+        conn.close()
+        return JSONResponse({"ok": False, "error": "user not found or wrong password"})
+    
+    # --- Transparent Password Upgrade (Plaintext → bcrypt) ---
+    # If password is still plaintext, verify & upgrade to bcrypt on first successful auth
+    db_password = user["password"]
+    is_valid = False
+    if db_password.startswith("$2b$") or db_password.startswith("$2a$"):
+        try:
+            is_valid = bcrypt.checkpw(input_password.encode('utf-8'), db_password.encode('utf-8'))
+        except Exception:
+            is_valid = False
+    else:
+        # Plaintext - verify and upgrade
+        if db_password == input_password:
+            is_valid = True
+            new_hash = bcrypt.hashpw(input_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            c.execute("UPDATE users SET password = ? WHERE id = ?", (new_hash, user["id"]))
+            conn.commit()
+    
+    if not is_valid:
+        conn.close()
         return JSONResponse({"ok": False, "error": "user not found or wrong password"})
         
-    username = user["username"] # Get username for tracking
+    username = user["username"]  # Get username for tracking
         
     if not user["is_active"]:
+        conn.close()
         return JSONResponse({"ok": False, "error": "account disabled"})
         
     # Check Expiration
@@ -183,19 +223,24 @@ async def hysteria_auth(request: Request):
             # Naive comparison fallback if no tzinfo
             if exp_date.tzinfo is None:
                 if datetime.datetime.now() > exp_date:
+                    conn.close()
                     return JSONResponse({"ok": False, "error": "account expired"})
             else:
                 if datetime.datetime.now(datetime.timezone.utc) > exp_date:
+                    conn.close()
                     return JSONResponse({"ok": False, "error": "account expired"})
         except Exception as e:
-            pass # Invalid date format, ignore or block
+            pass  # Invalid date format, ignore
             
     # Check Data Limit
     if user["data_limit_gb"] > 0:
         limit_bytes = user["data_limit_gb"] * 1024 * 1024 * 1024
         if user["data_used_bytes"] >= limit_bytes:
+            conn.close()
             return JSONResponse({"ok": False, "error": "data limit reached"})
             
+    conn.close()
+    
     # Check Device Limit via Hysteria Online API
     if user["device_limit"] > 0:
         try:
@@ -337,10 +382,12 @@ def add_user(user: UserCreate, admin: str = Depends(get_current_admin)):
     conn = get_db()
     c = conn.cursor()
     try:
+        # Hash the password with bcrypt before storing
+        hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         c.execute("""
             INSERT INTO users (username, password, data_limit_gb, expire_date, device_limit, is_active)
             VALUES (?, ?, ?, ?, ?, ?)
-        """, (user.username, user.password, user.data_limit_gb, user.expire_date, user.device_limit, user.is_active))
+        """, (user.username, hashed_password, user.data_limit_gb, user.expire_date, user.device_limit, user.is_active))
         conn.commit()
     except sqlite3.IntegrityError:
         conn.close()
@@ -352,10 +399,15 @@ def add_user(user: UserCreate, admin: str = Depends(get_current_admin)):
 def update_user(user_id: int, user: UserCreate, admin: str = Depends(get_current_admin)):
     conn = get_db()
     c = conn.cursor()
+    # Check if password is being changed (not already hashed)
+    if user.password and not (user.password.startswith("$2b$") or user.password.startswith("$2a$")):
+        new_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    else:
+        new_password = user.password  # Keep existing hash if already hashed
     c.execute("""
         UPDATE users SET username=?, password=?, data_limit_gb=?, expire_date=?, device_limit=?, is_active=?
         WHERE id=? AND role != 'admin'
-    """, (user.username, user.password, user.data_limit_gb, user.expire_date, user.device_limit, user.is_active, user_id))
+    """, (user.username, new_password, user.data_limit_gb, user.expire_date, user.device_limit, user.is_active, user_id))
     conn.commit()
     conn.close()
     
