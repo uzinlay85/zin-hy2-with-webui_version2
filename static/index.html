@@ -5,36 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hysteria 2 Panel</title>
     <meta name="description" content="Hysteria 2 VPN Web Management Panel">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        :root {
-            --bg:        #080c14;
-            --surface:   #0f1623;
-            --card:      #131c2e;
-            --card-hover:#172035;
-            --border:    rgba(255,255,255,0.07);
-            --border2:   rgba(255,255,255,0.12);
-            --text:      #e2e8f0;
-            --muted:     #64748b;
-            --primary:   #3b82f6;
-            --primary-g: linear-gradient(135deg,#3b82f6,#6366f1);
+                :root {
+            --bg:        #030712;
+            --surface:   #111827;
+            --card:      rgba(17, 24, 39, 0.65);
+            --card-hover:rgba(31, 41, 55, 0.75);
+            --border:    rgba(255,255,255,0.08);
+            --border2:   rgba(255,255,255,0.15);
+            --text:      #f3f4f6;
+            --muted:     #9ca3af;
+            --primary:   #6366f1;
+            --primary-g: linear-gradient(135deg, #4f46e5, #06b6d4);
             --green:     #10b981;
             --red:       #ef4444;
             --orange:    #f59e0b;
-            --purple:    #a855f7;
+            --purple:    #8b5cf6;
         }
 
-        html, body { height: 100%; }
-        body {
+        html,         body {
             background: var(--bg);
+            background-image: radial-gradient(circle at top right, rgba(30, 27, 75, 0.6) 0%, transparent 40%), radial-gradient(circle at bottom left, rgba(8, 51, 68, 0.4) 0%, transparent 40%);
+            background-attachment: fixed;
             color: var(--text);
             font-family: 'Inter', sans-serif;
             font-size: 14px;
             line-height: 1.5;
             min-height: 100vh;
         }
+        h1, h2, h3, .stat-value, .user-name { font-family: 'Outfit', sans-serif; }
+        
+        .stat-card, .user-card, .login-card, .modal-box, .online-panel, .list-item, .search-wrap input, .form-control {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+                body {
+            background: var(--bg);
+            background-image: radial-gradient(circle at top right, rgba(30, 27, 75, 0.6) 0%, transparent 40%), radial-gradient(circle at bottom left, rgba(8, 51, 68, 0.4) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        h1, h2, h3, .stat-value, .user-name { font-family: 'Outfit', sans-serif; }
+        
+        .stat-card, .user-card, .login-card, .modal-box, .online-panel, .list-item, .search-wrap input, .form-control {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
 
         /* ── Scrollbar ── */
         ::-webkit-scrollbar { width: 6px; }
@@ -503,8 +529,40 @@
         }
         .online-chevron { color: var(--muted); font-size: 12px; transition: transform 0.2s; }
         .online-panel.collapsed .online-chevron { transform: rotate(-90deg); }
-        .online-panel-body { padding: 12px 18px; }
-        .online-panel.collapsed .online-panel-body { display: none; }
+        .online-panel-        body {
+            background: var(--bg);
+            background-image: radial-gradient(circle at top right, rgba(30, 27, 75, 0.6) 0%, transparent 40%), radial-gradient(circle at bottom left, rgba(8, 51, 68, 0.4) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        h1, h2, h3, .stat-value, .user-name { font-family: 'Outfit', sans-serif; }
+        
+        .stat-card, .user-card, .login-card, .modal-box, .online-panel, .list-item, .search-wrap input, .form-control {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .online-panel.collapsed .online-panel-        body {
+            background: var(--bg);
+            background-image: radial-gradient(circle at top right, rgba(30, 27, 75, 0.6) 0%, transparent 40%), radial-gradient(circle at bottom left, rgba(8, 51, 68, 0.4) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        h1, h2, h3, .stat-value, .user-name { font-family: 'Outfit', sans-serif; }
+        
+        .stat-card, .user-card, .login-card, .modal-box, .online-panel, .list-item, .search-wrap input, .form-control {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
         .online-user-row {
             display: flex; align-items: center; gap: 10px;
             padding: 8px 0;
@@ -517,6 +575,15 @@
         }
         .online-conn-count span { color: #10b981; font-weight: 600; }
         .online-empty { color: var(--muted); font-size: 13px; text-align: center; padding: 12px 0; }
+
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .list-item, .user-card {
+            animation: fadeInUp 0.4s ease forwards;
+        }
 
         /* ── Responsive ── */
         @media (max-width: 700px) {
@@ -532,13 +599,13 @@
 <body>
 
 <!-- Toast -->
-<div id="toast">✅ <span id="toastMsg">Done</span></div>
+<div id="toast"><i data-lucide="check-circle" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i> <span id="toastMsg">Done</span></div>
 
 <!-- Login Overlay -->
 <div id="loginOverlay">
     <div class="login-card">
         <div class="login-logo">
-            <div class="icon">🚀</div>
+            <div class="icon"><i data-lucide="rocket" style="width:28px;height:28px;color:white;display:inline-block;vertical-align:middle;"></i></div>
             <h1>Hysteria 2 Panel</h1>
             <p>Sign in to manage your VPN users</p>
         </div>
@@ -551,7 +618,7 @@
                 <label>Password</label>
                 <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password" placeholder="••••••••">
             </div>
-            <p id="loginError" style="color:#ef4444;font-size:13px;margin-bottom:12px;display:none;">❌ Invalid username or password</p>
+            <p id="loginError" style="color:#ef4444;font-size:13px;margin-bottom:12px;display:none;"><i data-lucide="x-circle" style="width:18px;height:18px;display:inline-block;vertical-align:middle;"></i> Invalid username or password</p>
             <button type="submit" id="loginBtn" class="btn btn-primary btn-full">Sign In</button>
         </form>
     </div>
@@ -561,21 +628,21 @@
 <header class="header">
     <div class="header-inner">
         <div class="header-brand">
-            <div class="dot">⚡</div>
+            <div class="dot"><i data-lucide="zap" style="width:20px;height:20px;color:white;fill:white;display:inline-block;vertical-align:middle;"></i></div>
             <h1>Hysteria 2 Panel</h1>
         </div>
         <div class="header-actions">
             <button onclick="openBackupModal()" class="btn btn-ghost" id="backupBtn">
-                <span>💾</span><span>Backup</span>
+                <span><i data-lucide="save" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i></span><span>Backup</span>
             </button>
             <button onclick="openAdminModal()" class="btn btn-ghost" id="adminSettingsBtn">
-                <span>⚙️</span><span>Settings</span>
+                <span><i data-lucide="settings" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i></span><span>Settings</span>
             </button>
             <button onclick="openModal()" class="btn btn-primary" id="addUserBtn">
-                <span>+</span><span>Add User</span>
+                <span><i data-lucide="user-plus" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i></span><span>Add User</span>
             </button>
             <button onclick="doLogout()" class="btn btn-danger" id="logoutBtn">
-                <span>↩</span>
+                <span><i data-lucide="log-out" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i></span>
             </button>
         </div>
     </div>
@@ -586,22 +653,22 @@
     <!-- Stats -->
     <div class="stats-grid" id="statsGrid">
         <div class="stat-card">
-            <div class="stat-icon blue">👥</div>
+            <div class="stat-icon blue"><i data-lucide="users" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i></div>
             <div><div class="stat-label">Total Users</div><div class="stat-value" id="statTotal">0</div></div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon green">✅</div>
+            <div class="stat-icon green"><i data-lucide="check-circle" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i></div>
             <div><div class="stat-label">Active</div><div class="stat-value" id="statActive">0</div></div>
         </div>
         <div class="stat-card" style="border-color: rgba(16,185,129,0.3);">
             <div class="stat-icon green" style="position:relative;">
-                <span>🟢</span>
+                <span><i data-lucide="activity" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i></span>
                 <span style="position:absolute;top:4px;right:4px;width:7px;height:7px;background:#10b981;border-radius:50%;animation:pulse-green 2s infinite;"></span>
             </div>
             <div><div class="stat-label" style="color:#10b981;">Online Now</div><div class="stat-value" id="statOnline" style="color:#10b981;">0</div></div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon purple">📊</div>
+            <div class="stat-icon purple"><i data-lucide="bar-chart-2" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i></div>
             <div><div class="stat-label">Total Usage</div><div class="stat-value" id="statUsage">0 B</div></div>
         </div>
     </div>
@@ -625,7 +692,7 @@
     <div class="toolbar">
         <div class="toolbar-left">
             <div class="search-wrap">
-                <span class="search-icon">🔍</span>
+                <span class="search-icon"><i data-lucide="search" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i></span>
                 <input type="text" id="searchInput" placeholder="Search users..." oninput="filterUsers()">
             </div>
             <span class="user-count" id="userCountLabel"></span>
@@ -647,7 +714,7 @@
     <div class="modal-box">
         <div class="modal-header">
             <h2 class="modal-title" id="modalTitle">Add New User</h2>
-            <button class="modal-close" onclick="closeModal()">✕</button>
+            <button class="modal-close" onclick="closeModal()"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
         </div>
         <form id="userForm" onsubmit="saveUser(event)">
             <input type="hidden" id="userId">
@@ -690,7 +757,7 @@
     <div class="modal-box">
         <div class="modal-header">
             <h2 class="modal-title">Admin Settings</h2>
-            <button class="modal-close" onclick="closeAdminModal()">✕</button>
+            <button class="modal-close" onclick="closeAdminModal()"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
         </div>
         <form id="adminForm" onsubmit="updateAdmin(event)">
             <div class="form-group">
@@ -713,21 +780,21 @@
 <div id="backupModal" class="modal-overlay">
     <div class="modal-box" style="max-width:480px;">
         <div class="modal-header">
-            <h2 class="modal-title">💾 Backup &amp; Restore</h2>
-            <button class="modal-close" onclick="closeBackupModal()">✕</button>
+            <h2 class="modal-title"><i data-lucide="save" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i> Backup &amp; Restore</h2>
+            <button class="modal-close" onclick="closeBackupModal()"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
         </div>
 
         <!-- Backup Section -->
         <div style="margin-bottom:22px;">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                <span style="font-size:20px;">📤</span>
+                <span style="font-size:20px;"><i data-lucide="upload" style="width:24px;height:24px;display:inline-block;vertical-align:middle;"></i></span>
                 <div>
                     <div style="font-size:14px;font-weight:600;">Download Backup</div>
                     <div style="font-size:12px;color:var(--muted);">All users, passwords, data usage saved to JSON file</div>
                 </div>
             </div>
             <button onclick="doBackup()" class="btn btn-primary btn-full" id="backupDownloadBtn">
-                💾 Download Backup File
+                <i data-lucide="save" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i> Download Backup File
             </button>
         </div>
 
@@ -736,7 +803,7 @@
         <!-- Restore Section -->
         <div>
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-                <span style="font-size:20px;">📥</span>
+                <span style="font-size:20px;"><i data-lucide="download" style="width:18px;height:18px;display:inline-block;vertical-align:middle;"></i></span>
                 <div>
                     <div style="font-size:14px;font-weight:600;">Restore from Backup</div>
                     <div style="font-size:12px;color:var(--muted);">Import users from a .json backup file</div>
@@ -764,7 +831,7 @@
             <div id="restoreResult" style="display:none;margin-bottom:12px;"></div>
 
             <button onclick="doRestore()" class="btn btn-danger btn-full" id="restoreBtn">
-                📥 Restore Now
+                <i data-lucide="download" style="width:18px;height:18px;display:inline-block;vertical-align:middle;"></i> Restore Now
             </button>
             <p style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;">
                 ⚠️ Replace mode will delete ALL current users before importing
@@ -774,6 +841,7 @@
 </div>
 
 <script>
+    lucide.createIcons();
     const API_URL = 'api/users';
     let usersList = [];
     let filteredList = [];
@@ -798,10 +866,10 @@
         return `${Math.floor(secs/86400)}d ago`;
     }
 
-    function showToast(msg, icon = '✅') {
+    function showToast(msg, icon = '<i data-lucide="check-circle" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i>') {
         const t = document.getElementById('toast');
         document.getElementById('toastMsg').textContent = msg;
-        t.firstChild.textContent = icon + ' ';
+        t.children[0].innerHTML = icon;
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 2800);
     }
@@ -844,7 +912,7 @@
                 document.getElementById('loginOverlay').style.display = 'none';
                 fetchUsers();
             } else { err.style.display = 'block'; }
-        } catch { err.textContent = '❌ Connection failed'; err.style.display = 'block'; }
+        } catch { err.textContent = '<i data-lucide="x-circle" style="width:18px;height:18px;display:inline-block;vertical-align:middle;"></i> Connection failed'; err.style.display = 'block'; }
         btn.textContent = 'Sign In'; btn.disabled = false;
     }
 
@@ -905,10 +973,10 @@
     function getUserStatus(u) {
         const expired  = u.expire_date && new Date() > new Date(u.expire_date);
         const limitHit = u.data_limit_gb > 0 && u.data_used_bytes >= u.data_limit_gb * 1024**3;
-        if (!u.is_active) return { label: '⛔ Disabled', cls: 'badge-red' };
-        if (expired)      return { label: '⏰ Expired',  cls: 'badge-orange' };
-        if (limitHit)     return { label: '📵 Data Limit', cls: 'badge-red' };
-        return                   { label: '✅ Active',   cls: 'badge-green' };
+        if (!u.is_active) return { label: '<i data-lucide="slash" style="width:12px;height:12px;display:inline-block;vertical-align:middle;"></i> Disabled', cls: 'badge-red' };
+        if (expired)      return { label: '<i data-lucide="clock" style="width:12px;height:12px;display:inline-block;vertical-align:middle;"></i> Expired',  cls: 'badge-orange' };
+        if (limitHit)     return { label: '<i data-lucide="wifi-off" style="width:12px;height:12px;display:inline-block;vertical-align:middle;"></i> Data Limit', cls: 'badge-red' };
+        return                   { label: '<i data-lucide="check-circle" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i> Active',   cls: 'badge-green' };
     }
 
     function renderUsers() {
@@ -916,7 +984,7 @@
         container.innerHTML = '';
 
         if (!filteredList.length) {
-            container.innerHTML = `<div class="empty-state"><div class="icon">👤</div><p>No users found</p></div>`;
+            container.innerHTML = `<div class="empty-state"><div class="icon"><i data-lucide="user" style="width:32px;height:32px;display:inline-block;vertical-align:middle;"></i></div><p>No users found</p></div>`;
             return;
         }
 
@@ -989,15 +1057,16 @@
                     </div>
                 </div>
                 <div class="list-actions">
-                    <button class="icon-btn copy" onclick="copyLink(${u.id})" title="Copy Link">🔗</button>
-                    <button class="icon-btn reset" onclick="resetData(${u.id})" title="Reset Data">🔄</button>
-                    <button class="icon-btn edit" onclick="editUser(${u.id})" title="Edit">✏️</button>
-                    <button class="icon-btn del" onclick="deleteUser(${u.id})" title="Delete">🗑️</button>
+                    <button class="icon-btn copy" onclick="copyLink(${u.id})" title="Copy Link"><i data-lucide="link" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i></button>
+                    <button class="icon-btn reset" onclick="resetData(${u.id})" title="Reset Data"><i data-lucide="refresh-cw" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i></button>
+                    <button class="icon-btn edit" onclick="editUser(${u.id})" title="Edit"><i data-lucide="edit-3" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i></button>
+                    <button class="icon-btn del" onclick="deleteUser(${u.id})" title="Delete"><i data-lucide="trash-2" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i></button>
                 </div>
             `;
             list.appendChild(item);
         });
         container.appendChild(list);
+        lucide.createIcons();
     }
 
     function renderCardView(container) {
@@ -1041,19 +1110,20 @@
                     <div class="progress-fill ${pct > 85 ? 'danger' : ''}" style="width:${pct}%"></div>
                 </div>
                 <div class="meta-row">
-                    <div class="meta-item">📅 Expires: <span>${expText}</span></div>
-                    <div class="meta-item">📱 Devices: <span>${devText}</span></div>
+                    <div class="meta-item"><i data-lucide="calendar" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-top:-2px;"></i> Expires: <span>${expText}</span></div>
+                    <div class="meta-item"><i data-lucide="smartphone" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-top:-2px;"></i> Devices: <span>${devText}</span></div>
                 </div>
                 <div class="card-actions">
-                    <button class="action-btn copy" onclick="copyLink(${u.id})" title="Copy Link">🔗 Copy</button>
-                    <button class="action-btn reset" onclick="resetData(${u.id})" title="Reset Data">🔄 Reset</button>
-                    <button class="action-btn edit" onclick="editUser(${u.id})" title="Edit">✏️ Edit</button>
-                    <button class="action-btn del" onclick="deleteUser(${u.id})" title="Delete">🗑️</button>
+                    <button class="action-btn copy" onclick="copyLink(${u.id})" title="Copy Link"><i data-lucide="link" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i> Copy</button>
+                    <button class="action-btn reset" onclick="resetData(${u.id})" title="Reset Data"><i data-lucide="refresh-cw" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i> Reset</button>
+                    <button class="action-btn edit" onclick="editUser(${u.id})" title="Edit"><i data-lucide="edit-3" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i> Edit</button>
+                    <button class="action-btn del" onclick="deleteUser(${u.id})" title="Delete"><i data-lucide="trash-2" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i></button>
                 </div>
             `;
             grid.appendChild(card);
         });
         container.appendChild(grid);
+        lucide.createIcons();
     }
 
     /* ── Actions ── */
@@ -1061,10 +1131,10 @@
         const u = usersList.find(x => x.id === id);
         if (!u) return;
         const domain = window.location.hostname;
-        // ✅ Universal link - app အားလုံးအတွက် (Clash Meta, Sing-box, ShadowRocket, NekoBox, V2rayN)
+        // <i data-lucide="check-circle" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i> Universal link - app အားလုံးအတွက် (Clash Meta, Sing-box, ShadowRocket, NekoBox, V2rayN)
         const link = `hysteria2://${u.password}@${domain}:443?security=tls&obfs=salamander&obfs-password=OBFS_PASSWORD_PLACEHOLDER&fm=%7B%22quicParams%22%3A%7B%22udpHop%22%3A%7B%22ports%22%3A%2220000-50000%22%7D%7D%7D&mport=20000-50000&sni=${domain}#${u.username}`;
         navigator.clipboard.writeText(link)
-            .then(() => showToast('Link copied to clipboard!', '🔗'))
+            .then(() => showToast('Link copied to clipboard!', '<i data-lucide="link" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i>'))
             .catch(() => prompt('Copy this link:', link));
     }
 
@@ -1072,7 +1142,7 @@
         if (!confirm('Reset used data to 0 for this user?')) return;
         try {
             await apiFetch(`${API_URL}/${id}/reset_data`, { method: 'POST' });
-            showToast('Data usage reset!', '🔄');
+            showToast('Data usage reset!', '<i data-lucide="refresh-cw" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i>');
             fetchUsers();
         } catch (err) { console.error(err); }
     }
@@ -1082,7 +1152,7 @@
         if (!confirm(`Delete user "${u?.username}"? This cannot be undone.`)) return;
         try {
             await apiFetch(`${API_URL}/${id}`, { method: 'DELETE' });
-            showToast('User deleted', '🗑️');
+            showToast('User deleted', '<i data-lucide="trash-2" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i>');
             fetchUsers();
         } catch (err) { console.error(err); }
     }
@@ -1136,7 +1206,7 @@
             });
             if (res.ok) {
                 closeModal();
-                showToast(id ? 'User updated!' : 'User created!', '✅');
+                showToast(id ? 'User updated!' : 'User created!', '<i data-lucide="check-circle" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i>');
                 fetchUsers();
             } else {
                 const err = await res.json();
@@ -1195,11 +1265,11 @@
             const a = document.createElement('a');
             a.href = url; a.download = filename; a.click();
             URL.revokeObjectURL(url);
-            showToast('Backup downloaded!', '💾');
+            showToast('Backup downloaded!', '<i data-lucide="save" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i>');
         } catch (err) {
             alert('Backup failed: ' + err.message);
         }
-        btn.textContent = '💾 Download Backup File'; btn.disabled = false;
+        btn.textContent = '<i data-lucide="save" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i> Download Backup File'; btn.disabled = false;
     }
 
     async function doRestore() {
@@ -1237,7 +1307,7 @@
                 resultDiv.style.display = 'block';
                 resultDiv.innerHTML = `
                     <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:12px;">
-                        <div style="color:#10b981;font-weight:700;margin-bottom:4px;">✅ Restore Complete!</div>
+                        <div style="color:#10b981;font-weight:700;margin-bottom:4px;"><i data-lucide="check-circle" style="width:22px;height:22px;display:inline-block;vertical-align:middle;"></i> Restore Complete!</div>
                         <div style="font-size:13px;color:var(--muted);">
                             Imported: <strong style="color:var(--text);">${data.imported}</strong> users &nbsp;·&nbsp;
                             Skipped: <strong style="color:var(--text);">${data.skipped}</strong> &nbsp;·&nbsp;
@@ -1245,15 +1315,15 @@
                         </div>
                     </div>`;
                 fetchUsers();
-                showToast(`Restored ${data.imported} users!`, '📥');
+                showToast(`Restored ${data.imported} users!`, '<i data-lucide="download" style="width:18px;height:18px;display:inline-block;vertical-align:middle;"></i>');
             } else {
                 resultDiv.style.display = 'block';
-                resultDiv.innerHTML = `<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:12px;color:#ef4444;">❌ ${data.detail || 'Restore failed'}</div>`;
+                resultDiv.innerHTML = `<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:12px;color:#ef4444;"><i data-lucide="x-circle" style="width:18px;height:18px;display:inline-block;vertical-align:middle;"></i> ${data.detail || 'Restore failed'}</div>`;
             }
         } catch (err) {
             alert('Error: ' + err.message);
         }
-        btn.textContent = '📥 Restore Now'; btn.disabled = false;
+        btn.textContent = '<i data-lucide="download" style="width:18px;height:18px;display:inline-block;vertical-align:middle;"></i> Restore Now'; btn.disabled = false;
     }
 
     /* ── Online Status ── */
