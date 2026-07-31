@@ -8,10 +8,11 @@ lucide.createIcons();
 
     /* ── Helpers ── */
     function formatBytes(bytes, d = 2) {
-        if (!+bytes) return '0 B';
+        const parsedBytes = parseFloat(bytes);
+        if (isNaN(parsedBytes) || parsedBytes <= 0) return '0 B';
         const k = 1024, sizes = ['B','KB','MB','GB','TB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(d))} ${sizes[i]}`;
+        const i = Math.floor(Math.log(parsedBytes) / Math.log(k));
+        return `${parseFloat((parsedBytes / Math.pow(k, i)).toFixed(d))} ${sizes[i]}`;
     }
 
     function timeAgo(unixTs) {
@@ -105,17 +106,32 @@ lucide.createIcons();
 
     function updateStats() {
         let active = 0, inactive = 0, totalBytes = 0;
+        
         usersList.forEach(u => {
-            totalBytes += Number(u.data_used_bytes) || 0;
+            const usedBytes = Number(u.data_used_bytes || u.data_used || u.used_bytes || 0);
+            totalBytes += usedBytes;
+
             const expired = u.expire_date && new Date() > new Date(u.expire_date);
-            const limitHit = u.data_limit_gb > 0 && u.data_used_bytes >= u.data_limit_gb * 1024**3;
-            if (u.is_active && !expired && !limitHit) active++;
-            else inactive++;
+            const limitHit = u.data_limit_gb > 0 && usedBytes >= (u.data_limit_gb * Math.pow(1024, 3));
+            
+            if (u.is_active && !expired && !limitHit) {
+                active++;
+            } else {
+                inactive++;
+            }
         });
-        document.getElementById('statTotal').textContent = usersList.length;
-        document.getElementById('statActive').textContent = active;
-        document.getElementById('statInactive').textContent = inactive;
-        document.getElementById('statUsage').textContent = formatBytes(totalBytes);
+
+        console.log("Total Bytes Calculated:", totalBytes);
+
+        const elTotal = document.getElementById('statTotal');
+        const elActive = document.getElementById('statActive');
+        const elInactive = document.getElementById('statInactive');
+        const elUsage = document.getElementById('statUsage');
+
+        if (elTotal) elTotal.textContent = usersList.length;
+        if (elActive) elActive.textContent = active;
+        if (elInactive) elInactive.textContent = inactive;
+        if (elUsage) elUsage.textContent = formatBytes(totalBytes);
     }
 
     function filterUsers() {
