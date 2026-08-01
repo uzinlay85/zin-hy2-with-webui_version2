@@ -348,7 +348,7 @@ lucide.createIcons();
         document.getElementById('userId').value = '';
         document.getElementById('password').value = Math.random().toString(36).slice(-6);
         document.getElementById('dataLimit').value = '0';
-        document.getElementById('deviceLimit').value = '1';
+        document.getElementById('deviceLimit').value = '0';
         document.getElementById('isActive').checked = true;
         document.getElementById('userModal').classList.add('active');
     }
