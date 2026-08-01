@@ -1,4 +1,6 @@
 #!/bin/bash
+export LANG=C.UTF-8
+export LC_ALL=C.UTF-8
 
 # Color Definitions
 RED='\033[1;31m'
@@ -15,19 +17,19 @@ show_banner() {
 }
 
 check_hysteria() {
-    echo -e "\n${YELLOW}=== ၁။ Hysteria 2 Config ဖိုင် အခြေအနေ ===${NC}"
+    echo -e "\n${YELLOW}=== 1. Hysteria 2 Config (ဖိုင် အခြေအနေ) ===${NC}"
     if [ -f /etc/hysteria/config.yaml ]; then
         cat /etc/hysteria/config.yaml
     else
         echo -e "${RED}Config ဖိုင်ကို /etc/hysteria/config.yaml တွင် မတွေ့ပါ။${NC}"
     fi
 
-    echo -e "\n${YELLOW}=== ၂။ Hysteria 2 Service အလုပ်လုပ်/မလုပ် ===${NC}"
+    echo -e "\n${YELLOW}=== 2. Hysteria 2 Service (အလုပ်လုပ်/မလုပ်) ===${NC}"
     systemctl status hysteria-server --no-pager 2>/dev/null || echo -e "${RED}Hysteria Service ကို ရှာမတွေ့ပါ။${NC}"
 }
 
 check_panel() {
-    echo -e "\n${YELLOW}=== Web Panel (FastAPI) Service & Database အခြေအနေ ===${NC}"
+    echo -e "\n${YELLOW}=== 3. Web Panel Service & Database (အခြေအနေ) ===${NC}"
     systemctl status hy2-panel --no-pager 2>/dev/null || echo -e "${RED}Web Panel Service ကို ရှာမတွေ့ပါ။${NC}"
     
     if [ -f /opt/hy2-panel/database.db ]; then
@@ -37,7 +39,7 @@ check_panel() {
 }
 
 check_network() {
-    echo -e "\n${YELLOW}=== UDP Port Hopping & Sysctl Buffer အခြေအနေ ===${NC}"
+    echo -e "\n${YELLOW}=== 4. UDP Port Hopping & Sysctl Buffers (အခြေအနေ) ===${NC}"
     echo -e "${GREEN}--- UFW Status ---${NC}"
     ufw status 2>/dev/null || echo "UFW မသုံးထားပါ။"
     
@@ -49,15 +51,15 @@ check_network() {
 }
 
 check_online() {
-    echo -e "\n${YELLOW}=== လက်ရှိ ချိတ်ဆက်နေသော Online Users အခြေအနေ ===${NC}"
+    echo -e "\n${YELLOW}=== 5. Online Users (လက်ရှိ ချိတ်ဆက်သူများ) ===${NC}"
     curl -s http://127.0.0.1:8080/online 2>/dev/null | python3 -m json.tool 2>/dev/null || echo -e "${RED}Online Traffic Stats API သို့ လှမ်းယူ၍ မရပါ။${NC}"
 }
 
 check_logs() {
-    echo -e "\n${YELLOW}=== Hysteria 2 နောက်ဆုံး Error Logs (၁၀ ကြောင်း) ===${NC}"
+    echo -e "\n${YELLOW}=== 6. Hysteria 2 Error Logs (နောက်ဆုံး ၁၀ ကြောင်း) ===${NC}"
     journalctl -u hysteria-server -n 10 --no-pager 2>/dev/null || echo -e "${RED}Hysteria Log မတွေ့ပါ။${NC}"
     
-    echo -e "\n${YELLOW}=== Web Panel နောက်ဆုံး Error Logs (၁၀ ကြောင်း) ===${NC}"
+    echo -e "\n${YELLOW}=== Web Panel Error Logs (နောက်ဆုံး ၁၀ ကြောင်း) ===${NC}"
     journalctl -u hy2-panel -n 10 --no-pager 2>/dev/null || echo -e "${RED}Panel Log မတွေ့ပါ။${NC}"
 }
 
