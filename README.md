@@ -59,14 +59,40 @@ Hysteria 2 Server သို့မဟုတ် Web Panel တွင် အခက�
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/uzinlay85/zin-hy2-with-webui_version2/main/status.sh)
 ```
-ဤ Script သည် Config ဖိုင်များ၊ Service အလုပ်လုပ်/မလုပ်၊ Firewall Port Hopping အခြေအနေနှင့် နောက်ဆုံးပေါ်နေသော Error Log များကို တစ်ပေါင်းတည်း စစ်ဆေးပြသပေးပါမည်။
+ဤ Script သည် စနစ်တစ်ခုလုံးကို အလိုအလျောက် စစ်ဆေးပြသပေးမည့်အပြင်၊ အစိတ်အပိုင်း တစ်ခုချင်းစီ (Hysteria, Web Panel, Ports, Logs, SSL) ကို သီးခြား ရွေးချယ် စစ်ဆေးနိုင်သည့် Interactive Menu ကိုလည်း ပါဝင်ပြသပေးပါမည်။
 
-**🔴 Real-Time (Live) Server Log ကို စောင့်ကြည့်ရန်:**
-ဆာဗာ ပုံမှန်အလုပ်လုပ်နေသလား၊ User တွေ ချိတ်ဆက်မှုပြတ်တောက်သွားသလား၊ Error တက်နေသလား ဆိုတာကို စက္ကန့်နဲ့အမျှ (Live) ကြည့်ရှုလိုပါက အောက်ပါ Command ကို Run ပါ -
-```bash
-journalctl -u hysteria-server.service -f
-```
-*(Live ကြည့်နေသည်ကို ရပ်တန့်လိုပါက Keyboard မှ **`Ctrl + C`** ကို နှိပ်ပါ။)*
+### 🛠️ သီးခြား Command ဖြင့် တိုက်ရိုက် စစ်ဆေးနည်းများ
+အကယ်၍ Menu မသုံးဘဲ Terminal ထဲတွင် သီးခြား Command များဖြင့် တိုက်ရိုက် စစ်ဆေးလိုပါက အောက်ပါအတိုင်း သုံးနိုင်ပါသည်။
+
+- **Hysteria Service နှင့် Config သာ စစ်ရန်:**
+  ```bash
+  systemctl status hysteria-server && cat /etc/hysteria/config.yaml
+  ```
+
+- **Web Panel (FastAPI) Service သာ စစ်ရန်:**
+  ```bash
+  systemctl status hy2-panel
+  ```
+
+- **Port Hopping (iptables) သာ စစ်ရန်:**
+  ```bash
+  iptables -t nat -L PREROUTING -n -v | grep 20000
+  ```
+
+- **လက်ရှိ ချိတ်ဆက်နေသော Online Users သာ စစ်ရန်:**
+  ```bash
+  curl -s http://127.0.0.1:8080/online | python3 -m json.tool
+  ```
+
+- **Real-time Live Logs ကို တိုက်ရိုက်ကြည့်ရန်:**
+  ```bash
+  journalctl -u hysteria-server.service -f
+  ```
+
+- **SSL Certificate သက်တမ်း သာ စစ်ရန်:**
+  ```bash
+  certbot certificates
+  ```
 
 **📊 ဆာဗာ၏ လုပ်ဆောင်နိုင်စွမ်းကို ဂရပ်ဖစ်ဖြင့် ရှင်းလင်းစွာ ကြည့်ရှုရန် (System Monitoring):**
 `htop` ထက် ပိုမိုလှပရှင်းလင်းပြီး Data အပြည့်အစုံကို လွယ်ကူစွာကြည့်ရှုလိုပါက **btop** (သို့) **glances** ကို အသုံးပြုနိုင်ပါသည်။
