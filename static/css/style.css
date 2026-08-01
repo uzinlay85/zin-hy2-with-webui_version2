@@ -392,8 +392,15 @@
             flex-shrink: 0; flex-wrap: wrap;
         }
         .list-meta-item { text-align: center; min-width: 70px; }
+        .list-meta-item.exp-item { min-width: 130px; text-align: center; }
+        .list-meta-item.status-item { min-width: 75px; text-align: center; }
+        .list-meta-item.devices-item { min-width: 60px; text-align: center; }
         .list-meta-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
         .list-meta-val { font-size: 13px; font-weight: 600; margin-top: 1px; }
+        .exp-sub { font-size: 10px; font-weight: 500; margin-top: 1px; white-space: nowrap; }
+        .exp-sub.sub-ok { color: #10b981; }
+        .exp-sub.sub-warning { color: #f59e0b; }
+        .exp-sub.sub-expired { color: #ef4444; }
         .list-progress {
             width: 80px;
         }

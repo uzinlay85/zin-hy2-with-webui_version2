@@ -51,8 +51,10 @@ lucide.createIcons();
         }
     });
 
-    function formatExpireDate(expireDateStr) {
-        if (!expireDateStr) return 'Never';
+    function getExpireInfo(expireDateStr) {
+        if (!expireDateStr) {
+            return { date: 'Never', sub: '', badgeClass: '' };
+        }
         const dateOnly = expireDateStr.split('T')[0];
         const exp = new Date(expireDateStr);
         const today = new Date();
@@ -63,13 +65,13 @@ lucide.createIcons();
         const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
         
         if (diffDays < 0) {
-            return `${dateOnly} (Expired)`;
+            return { date: dateOnly, sub: 'Expired', badgeClass: 'sub-expired' };
         } else if (diffDays === 0) {
-            return `${dateOnly} (Today)`;
+            return { date: dateOnly, sub: 'Expires today', badgeClass: 'sub-warning' };
         } else if (diffDays === 1) {
-            return `${dateOnly} (1 day left)`;
+            return { date: dateOnly, sub: '1 day left', badgeClass: 'sub-warning' };
         } else {
-            return `${dateOnly} (${diffDays} days left)`;
+            return { date: dateOnly, sub: `${diffDays} days left`, badgeClass: 'sub-ok' };
         }
     }
 
@@ -209,7 +211,7 @@ lucide.createIcons();
             const used  = formatBytes(u.data_used_bytes);
             const limit = u.data_limit_gb > 0 ? `${u.data_limit_gb} GB` : '∞';
             const pct   = u.data_limit_gb > 0 ? Math.min(100, (u.data_used_bytes / (u.data_limit_gb * 1024**3)) * 100) : 0;
-            const expText = formatExpireDate(u.expire_date);
+            const expInfo = getExpireInfo(u.expire_date);
             const devText = u.device_limit > 0 ? u.device_limit : '∞';
             const { label, cls } = getUserStatus(u);
             const initials = u.username.slice(0,2).toUpperCase();
@@ -241,15 +243,16 @@ lucide.createIcons();
                     </div>
                 </div>
                 <div class="list-meta">
-                    <div class="list-meta-item">
+                    <div class="list-meta-item status-item">
                         <div class="list-meta-label">Status</div>
                         <span class="badge ${cls}" style="font-size:10px;padding:2px 8px;">${label}</span>
                     </div>
-                    <div class="list-meta-item">
+                    <div class="list-meta-item exp-item">
                         <div class="list-meta-label">Expires</div>
-                        <div class="list-meta-val" style="font-size:12px;">${expText}</div>
+                        <div class="list-meta-val" style="font-size:12px;white-space:nowrap;">${expInfo.date}</div>
+                        ${expInfo.sub ? `<div class="exp-sub ${expInfo.badgeClass}">${expInfo.sub}</div>` : ''}
                     </div>
-                    <div class="list-meta-item">
+                    <div class="list-meta-item devices-item">
                         <div class="list-meta-label">Devices</div>
                         <div class="list-meta-val">${devText}</div>
                     </div>
@@ -283,7 +286,8 @@ lucide.createIcons();
             const used = formatBytes(u.data_used_bytes);
             const limit = u.data_limit_gb > 0 ? `${u.data_limit_gb} GB` : 'Unlimited';
             const pct   = u.data_limit_gb > 0 ? Math.min(100, (u.data_used_bytes / (u.data_limit_gb * 1024**3)) * 100) : 0;
-            const expText = formatExpireDate(u.expire_date);
+            const expInfo = getExpireInfo(u.expire_date);
+            const expDisplay = expInfo.sub ? `${expInfo.date} (${expInfo.sub})` : expInfo.date;
             const devText = u.device_limit > 0 ? u.device_limit : '∞';
             const { label: badge, cls: bclass } = getUserStatus(u);
             const online = isOnline(u.username);
@@ -316,7 +320,7 @@ lucide.createIcons();
                     <div class="progress-fill ${pct > 85 ? 'danger' : ''}" style="width:${pct}%"></div>
                 </div>
                 <div class="meta-row">
-                    <div class="meta-item"><i data-lucide="calendar" class="lucide-icon icon-14" style="margin-top:-2px"></i> Expires: <span>${expText}</span></div>
+                    <div class="meta-item"><i data-lucide="calendar" class="lucide-icon icon-14" style="margin-top:-2px"></i> Expires: <span>${expDisplay}</span></div>
                     <div class="meta-item"><i data-lucide="smartphone" class="lucide-icon icon-14" style="margin-top:-2px"></i> Devices: <span>${devText}</span></div>
                 </div>
                 <div class="card-actions">
