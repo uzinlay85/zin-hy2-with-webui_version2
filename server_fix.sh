@@ -198,16 +198,20 @@ if [ -f /etc/hysteria/config.yaml ]; then
     sed -i 's|300s|120s|g' /etc/hysteria/config.yaml
     sed -i -E 's|[M|m]ax[I|i]dle[T|t]imeout:.*|maxIdleTimeout: 120s|g' /etc/hysteria/config.yaml
     sed -i -E 's|[K|k]eep[A|a]live[P|p]eriod:.*|keepAlivePeriod: 5s|g' /etc/hysteria/config.yaml
+    sed -i -E 's|initStreamReceiveWindow:.*|initStreamReceiveWindow: 26843545|g' /etc/hysteria/config.yaml
+    sed -i -E 's|maxStreamReceiveWindow:.*|maxStreamReceiveWindow: 26843545|g' /etc/hysteria/config.yaml
+    sed -i -E 's|initConnReceiveWindow:.*|initConnReceiveWindow: 67108864|g' /etc/hysteria/config.yaml
+    sed -i -E 's|maxConnReceiveWindow:.*|maxConnReceiveWindow: 67108864|g' /etc/hysteria/config.yaml
 
     if ! grep -q "keepAlivePeriod:" /etc/hysteria/config.yaml; then
         cat >> /etc/hysteria/config.yaml << 'EOF_HY2_OPT'
 
-# Cellular NAT & App Stability Optimizations (Ultra-Persistent Connection)
+# Cellular NAT & App Stability Optimizations (Ultra-Persistent Connection & 64MB QUIC Windows)
 quic:
-  initStreamReceiveWindow: 8388608
-  maxStreamReceiveWindow: 8388608
-  initConnReceiveWindow: 20971520
-  maxConnReceiveWindow: 20971520
+  initStreamReceiveWindow: 26843545
+  maxStreamReceiveWindow: 26843545
+  initConnReceiveWindow: 67108864
+  maxConnReceiveWindow: 67108864
   maxIdleTimeout: 120s
   keepAlivePeriod: 5s
 
