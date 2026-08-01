@@ -544,13 +544,53 @@
             .btn > span:last-child { display: none; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
             .users-grid { grid-template-columns: 1fr; }
-            .list-meta { display: none; }
-            .list-progress { display: none; }
             
-            /* Fix list item overlap on small screens */
-            .list-item { flex-wrap: wrap; gap: 10px; padding: 12px; }
-            .list-main { flex: 1; min-width: 120px; }
-            .list-actions { width: 100%; justify-content: flex-end; padding-top: 8px; border-top: 1px solid var(--border); }
+            /* Responsive Mobile List Item Layout - Show all Meta & Usage */
+            .list-item { 
+                flex-direction: column; 
+                align-items: stretch; 
+                gap: 12px; 
+                padding: 14px; 
+            }
+            .list-top-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+            }
+            .list-main { flex: 1; min-width: 0; }
+            .list-meta { 
+                display: flex !important; 
+                flex-direction: row; 
+                justify-content: space-between; 
+                align-items: center; 
+                width: 100%; 
+                background: rgba(255,255,255,0.03); 
+                padding: 8px 12px; 
+                border-radius: 8px;
+                border: 1px solid var(--border);
+            }
+            .list-meta-item.exp-item,
+            .list-meta-item.status-item,
+            .list-meta-item.devices-item { 
+                min-width: auto; 
+                text-align: center; 
+            }
+            .list-progress { 
+                display: block !important; 
+                width: 100%; 
+            }
+            .list-actions { 
+                width: 100%; 
+                justify-content: space-between; 
+                gap: 8px;
+                padding-top: 8px; 
+                border-top: 1px solid var(--border); 
+            }
+            .list-actions .icon-btn {
+                flex: 1;
+                height: 36px;
+            }
         }
         /* Accessibility */
         button:focus-visible, input:focus-visible {

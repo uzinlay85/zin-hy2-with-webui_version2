@@ -227,19 +227,21 @@ lucide.createIcons();
             const item = document.createElement('div');
             item.className = 'list-item' + (online ? ' list-item-online' : '');
             item.innerHTML = `
-                <div class="list-avatar ${online ? 'avatar-online' : 'avatar-offline-dim'}">${initials}</div>
-                <div class="list-main">
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                        <div class="list-name" title="${u.username}">${u.username}</div>
-                        ${online ? `
-                        <span class="online-status-badge">
-                            <span class="dot-anim"></span>
-                            ONLINE &nbsp;·&nbsp; ${connCount} conn${connCount > 1 ? 's' : ''}
-                        </span>` : ''}
-                    </div>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <div class="list-pass">${u.password}</div>
-                        ${lastSeen}
+                <div class="list-top-row">
+                    <div class="list-avatar ${online ? 'avatar-online' : 'avatar-offline-dim'}">${initials}</div>
+                    <div class="list-main">
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <div class="list-name" title="${u.username}">${u.username}</div>
+                            ${online ? `
+                            <span class="online-status-badge">
+                                <span class="dot-anim"></span>
+                                ONLINE &nbsp;·&nbsp; ${connCount} conn${connCount > 1 ? 's' : ''}
+                            </span>` : ''}
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <div class="list-pass">${u.password}</div>
+                            ${lastSeen}
+                        </div>
                     </div>
                 </div>
                 <div class="list-meta">
