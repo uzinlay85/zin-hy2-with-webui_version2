@@ -66,6 +66,16 @@ def init_db():
     except Exception:
         pass  # Column already exists
     
+    # Migration: add up_mbps and down_mbps columns for dynamic user speed limits
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN up_mbps INTEGER DEFAULT 0")
+    except Exception:
+        pass
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN down_mbps INTEGER DEFAULT 0")
+    except Exception:
+        pass
+
     # Auto-migration: Restore plaintext password from display_password if password holds bcrypt hash
     try:
         c.execute("UPDATE users SET password = display_password WHERE display_password IS NOT NULL AND display_password != '' AND (password LIKE '$2b$%' OR password LIKE '$2a$%')")
@@ -91,6 +101,8 @@ class UserCreate(BaseModel):
     data_limit_gb: float = 0.0
     expire_date: str = ""
     device_limit: int = 0
+    up_mbps: int = 0
+    down_mbps: int = 0
     is_active: bool = True
 
 class AdminUpdate(BaseModel):
@@ -264,7 +276,15 @@ async def hysteria_auth(request: Request):
     
     # Success! Cache successful auth for 60s
     AUTH_CACHE[auth_str] = (True, username, now + AUTH_CACHE_SUCCESS_TTL)
-    return JSONResponse({"ok": True, "id": username})
+    auth_resp = {"ok": True, "id": username}
+    try:
+        if "up_mbps" in user.keys() and user["up_mbps"] and user["up_mbps"] > 0:
+            auth_resp["up_mbps"] = user["up_mbps"]
+        if "down_mbps" in user.keys() and user["down_mbps"] and user["down_mbps"] > 0:
+            auth_resp["down_mbps"] = user["down_mbps"]
+    except Exception:
+        pass
+    return JSONResponse(auth_resp)
 
 # --- Management API (For Web Panel) ---
 
@@ -272,7 +292,7 @@ async def hysteria_auth(request: Request):
 def get_users(admin: str = Depends(get_current_admin)):
     conn = get_db()
     c = conn.cursor()
-    c.execute("SELECT id, username, password, display_password, data_limit_gb, data_used_bytes, expire_date, device_limit, is_active, role FROM users WHERE role != 'admin'")
+    c.execute("SELECT id, username, password, display_password, data_limit_gb, data_used_bytes, expire_date, device_limit, up_mbps, down_mbps, is_active, role FROM users WHERE role != 'admin'")
     rows = c.fetchall()
     conn.close()
     users = []
@@ -429,10 +449,10 @@ def add_user(user: UserCreate, admin: str = Depends(get_current_admin)):
     try:
         # Store password directly in both password and display_password for instant O(1) auth
         c.execute("""
-            INSERT INTO users (username, password, display_password, data_limit_gb, expire_date, device_limit, is_active)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO users (username, password, display_password, data_limit_gb, expire_date, device_limit, up_mbps, down_mbps, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (user.username, user.password, user.password,
-               user.data_limit_gb, user.expire_date, user.device_limit, user.is_active))
+               user.data_limit_gb, user.expire_date, user.device_limit, user.up_mbps, user.down_mbps, user.is_active))
         conn.commit()
         AUTH_CACHE.clear()
     except sqlite3.IntegrityError:
@@ -447,10 +467,12 @@ def update_user(user_id: int, user: UserCreate, admin: str = Depends(get_current
     c = conn.cursor()
     c.execute("""
         UPDATE users SET username=?, password=?, display_password=?,
-                         data_limit_gb=?, expire_date=?, device_limit=?, is_active=?
+                         data_limit_gb=?, expire_date=?, device_limit=?,
+                         up_mbps=?, down_mbps=?, is_active=?
         WHERE id=? AND role != 'admin'
     """, (user.username, user.password, user.password,
-           user.data_limit_gb, user.expire_date, user.device_limit, user.is_active, user_id))
+           user.data_limit_gb, user.expire_date, user.device_limit,
+           user.up_mbps, user.down_mbps, user.is_active, user_id))
     conn.commit()
     conn.close()
     AUTH_CACHE.clear()
