@@ -257,7 +257,18 @@ echo ""
 echo "--- iptables Port Hopping ---"
 iptables -t nat -L PREROUTING -n -v 2>/dev/null | grep -E "20000|50000|443" || echo "⚠️  Port Hopping rule မတွေ့ပါ"
 
+# Create CLI command shortcut 'hy2'
+cat > /usr/local/bin/hy2 << 'EOF_HY2_CLI'
+#!/bin/bash
+if [ -f /opt/hy2-panel/status.sh ]; then
+    bash /opt/hy2-panel/status.sh "$@"
+else
+    bash <(curl -fsSL https://raw.githubusercontent.com/uzinlay85/zin-hy2-with-webui_version2/main/status.sh) "$@"
+fi
+EOF_HY2_CLI
+chmod +x /usr/local/bin/hy2
+
 echo ""
 echo "========================================================"
-echo "🎉 Done! Monitor: journalctl -u hysteria-server.service -f"
+echo "🎉 Done! Type 'hy2' in terminal anytime for management menu"
 echo "========================================================"

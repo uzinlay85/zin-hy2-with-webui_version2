@@ -66,6 +66,15 @@ check_ssl() {
     certbot certificates 2>/dev/null || echo -e "${RED}Certbot မတွေ့ပါ။${NC}"
 }
 
+do_update() {
+    echo -e "\n${YELLOW}=== စနစ်တစ်ခုလုံးကို အလိုအလျောက် Update ပြုလုပ်နေပါသည်... ===${NC}"
+    if [ -f /opt/hy2-panel/auto_update.sh ]; then
+        bash /opt/hy2-panel/auto_update.sh
+    else
+        bash <(curl -fsSL https://raw.githubusercontent.com/uzinlay85/zin-hy2-with-webui_version2/main/auto_update.sh)
+    fi
+}
+
 full_diagnostic() {
     show_banner
     check_hysteria
@@ -95,10 +104,11 @@ while true; do
     echo -e "${GREEN}၅)${NC} Online Users & Real-time Traffic စစ်မည်"
     echo -e "${GREEN}၆)${NC} Error Logs (Hysteria & Web Panel) ကြည့်မည်"
     echo -e "${GREEN}၇)${NC} SSL Certificate သက်တမ်း စစ်မည်"
-    echo -e "${GREEN}၈)${NC} Exit (ထွက်မည်)"
+    echo -e "${GREEN}၈)${NC} Auto-Update System (စနစ်တစ်ခုလုံးကို အလိုအလျောက် Update ပြုလုပ်မည်)"
+    echo -e "${GREEN}၉)${NC} Exit (ထွက်မည်)"
     echo -e "${CYAN}========================================================${NC}"
     
-    read -p "ရွေးချယ်ရန် နံပါတ်နှိပ်ပါ [1-8]: " choice < /dev/tty
+    read -p "ရွေးချယ်ရန် နံပါတ်နှိပ်ပါ [1-9]: " choice < /dev/tty
     
     case $choice in
         1) full_diagnostic ;;
@@ -108,7 +118,8 @@ while true; do
         5) check_online ;;
         6) check_logs ;;
         7) check_ssl ;;
-        8) echo -e "\n${GREEN}Bye!${NC}\n"; exit 0 ;;
+        8) do_update ;;
+        9) echo -e "\n${GREEN}Bye!${NC}\n"; exit 0 ;;
         *) echo -e "\n${RED}မှားယွင်းသော ရွေးချယ်မှုဖြစ်သည်!${NC}" ;;
     esac
 done

@@ -260,11 +260,16 @@ ln -sf /etc/nginx/sites-available/hy2-panel /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
 systemctl restart nginx
 
-# Start Services
-systemctl enable hysteria-server.service
-systemctl restart hysteria-server.service
-systemctl enable hy2-panel.service
-systemctl restart hy2-panel.service
+# Create CLI command shortcut 'hy2'
+cat > /usr/local/bin/hy2 << 'EOF_HY2_CLI'
+#!/bin/bash
+if [ -f /opt/hy2-panel/status.sh ]; then
+    bash /opt/hy2-panel/status.sh "$@"
+else
+    bash <(curl -fsSL https://raw.githubusercontent.com/uzinlay85/zin-hy2-with-webui_version2/main/status.sh) "$@"
+fi
+EOF_HY2_CLI
+chmod +x /usr/local/bin/hy2
 
 echo "========================================================"
 echo "✅ Installation Completed Successfully!"
@@ -272,5 +277,6 @@ echo "========================================================"
 echo "Web Panel URL: https://$DOMAIN/hy2-api/"
 echo "Admin Login  : admin"
 echo "Password     : $ADMIN_PASS"
+echo "CLI Shortcut : Type 'hy2' in terminal anytime for management menu"
 echo "========================================================"
 echo "မှတ်ချက်။ ။ ပထမဆုံး Login ဝင်ပြီးပါက Admin Settings တွင် Password အသစ် ပြောင်းလဲပါ။"
