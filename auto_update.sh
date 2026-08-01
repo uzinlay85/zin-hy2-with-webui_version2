@@ -96,6 +96,17 @@ if [ -d "$PANEL_DIR" ]; then
     echo "🔄 Restarting Web Panel service..."
     systemctl restart hy2-panel.service
     echo "✅ Web Panel updated successfully."
+
+    # Create/update CLI command shortcut 'hy2'
+    cat > /usr/local/bin/hy2 << 'EOF_HY2_CLI'
+#!/bin/bash
+if [ -f /opt/hy2-panel/status.sh ]; then
+    bash /opt/hy2-panel/status.sh "$@"
+else
+    bash <(curl -fsSL https://raw.githubusercontent.com/uzinlay85/zin-hy2-with-webui_version2/main/status.sh) "$@"
+fi
+EOF_HY2_CLI
+    chmod +x /usr/local/bin/hy2
 else
     echo "⚠️ Web Panel directory ($PANEL_DIR) not found. Skipping..."
 fi
