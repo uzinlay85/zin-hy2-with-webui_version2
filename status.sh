@@ -66,6 +66,21 @@ check_ssl() {
     certbot certificates 2>/dev/null || echo -e "${RED}Certbot မတွေ့ပါ။${NC}"
 }
 
+check_system_resources() {
+    echo -e "\n${YELLOW}=== ၇။ System Resources Summary (CPU / RAM / Disk) ===${NC}"
+    echo -e "${GREEN}--- System Load Average ---${NC}"
+    uptime | awk -F'load average:' '{printf "  Load Average:%s\n", $2}' 2>/dev/null
+    
+    echo -e "\n${GREEN}--- RAM (Memory) Usage ---${NC}"
+    free -m | awk '/Mem:/ {printf "  RAM Used: %d MB / %d MB (%.1f%% used)\n", $3, $2, $3/$2*100}' 2>/dev/null
+    
+    echo -e "\n${GREEN}--- Disk Storage Usage ---${NC}"
+    df -h / | awk 'NR==2 {printf "  Disk Used: %s / %s (%s used)\n", $3, $2, $5}' 2>/dev/null
+    
+    echo -e "\n${GREEN}--- Core Process Resource Usage ---${NC}"
+    ps aux | grep -E "hysteria|uvicorn" | grep -v grep | awk '{printf "  • %-15s (PID: %-6s | CPU: %-4s%% | RAM: %d MB)\n", $11, $2, $3, int($6/1024)}' 2>/dev/null
+}
+
 show_btop() {
     if command -v btop &> /dev/null; then
         btop
@@ -95,6 +110,7 @@ full_diagnostic() {
     check_online
     check_logs
     check_ssl
+    check_system_resources
     echo -e "\n${GREEN}========================================================${NC}"
     echo -e "${GREEN}✅ စစ်ဆေးမှု အားလုံး ပြီးဆုံးပါပြီ${NC}"
     echo -e "${GREEN}========================================================${NC}\n"
