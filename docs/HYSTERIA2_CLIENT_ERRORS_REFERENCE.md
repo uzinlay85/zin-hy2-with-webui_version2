@@ -57,3 +57,15 @@
 - **အကြောင်းရင်း**: Client တွင် ထည့်သွင်းထားသော `server_name` သို့မဟုတ် `sni` Domain သည် Server SSL Certificate ၏ Domain Name နှင့် မကိုက်ညီခြင်း။
 - **ငါတို့စနစ်၏ ဖြေရှင်းထားမှု**:
   - Web Panel မှ ထုတ်ပေးသော URI Link ထဲတွင် `sni=${domain}` ကို အလိုအလျောက် ၁:၁ တိကျစွာ ထည့်ပေးထားသဖြင့် ဤ Error ကို ၁၀၀% ကာကွယ်ထားပြီး ဖြစ်သည်။
+
+---
+
+### 9. `[FATA] failed to load server config (invalid config: listen: listen udp :443: bind: permission denied)`
+- **အကြောင်းရင်း**: Linux Operating System တွင် Port 1024 ၏ အောက်တွင်ရှိသော Port များ (ဥပမာ - UDP 443) ကို Bind လုပ်၍ လမ်းဖွင့်ရန် Root Privilege သို့မဟုတ် `cap_net_bind_service` Capability မရှိဘဲ Server Process ကို လမ်းဖွင့်ရန် ကြိုးစားမိခြင်း။
+- **ဖြေရှင်းနည်းများ**:
+  1. Hysteria Server ကို Root User / Systemd Service အဖြစ် Run ခြင်း။
+  2. သို့မဟုတ် non-root user ဖြင့် သုံးပါက Linux capability သတ်မှတ်ပေးခြင်း:
+     `sudo setcap cap_net_bind_service=+ep /usr/local/bin/hysteria`
+- **ငါတို့စနစ်၏ ဖြေရှင်းထားမှု**:
+  - ကျွန်ုပ်တို့၏ Systemd Service (`/etc/systemd/system/hysteria-server.service`) တွင် Root Privileges ဖြင့် စနစ်တကျ မောင်းနှင်ထားသဖြင့် Port 443 Binding Permission Error လုံးဝ မဖြစ်ပွားပါ။
+
