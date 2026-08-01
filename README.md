@@ -54,6 +54,17 @@ Update လုပ်ပြီးပါက Browser တွင် **`Ctrl + F5`** (H
 
 ## 🔍 ၃။ ဆာဗာ အခြေအနေ စစ်ဆေးနည်းများ (Diagnostic Tool)
 
+### ⚡ CLI Shortcut Command (အလွယ်ကူဆုံး စာလုံးတို နည်းလမ်း)
+ဆာဗာ Terminal ထဲတွင် အောက်ပါ စာလုံးတိုလေး ရိုက်ထည့်လိုက်သည်နှင့် Management & Diagnostic Menu တန်းဝင် ပွင့်လာမည် ဖြစ်ပါသည် -
+
+```bash
+hy2
+```
+*(မှတ်ချက်။ `hy2` သို့မဟုတ် `zin-hy2` ဟု ရိုက်နှိပ်ရုံဖြင့် Hysteria Config, Panel Status, Online Users, Live Logs စသည်တို့ကို တစ်နေရာတည်းတွင် နှိပ်၍ စစ်ဆေးနိုင်ပါသည်။)*
+
+---
+
+### 🌐 Direct Remote Command (Link အရှည်ဖြင့် Run နည်း)
 Hysteria 2 Server သို့မဟုတ် Web Panel တွင် အခက်အခဲ တစ်စုံတစ်ရာ ရှိပါက (သို့မဟုတ်) Port များနှင့် Error Log များကို တစ်နေရာတည်းတွင် စစ်ဆေးလိုပါက အောက်ပါ Command ကို Run ပါ -
 
 ```bash
