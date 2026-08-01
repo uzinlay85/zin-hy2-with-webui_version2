@@ -51,6 +51,28 @@ lucide.createIcons();
         }
     });
 
+    function formatExpireDate(expireDateStr) {
+        if (!expireDateStr) return 'Never';
+        const dateOnly = expireDateStr.split('T')[0];
+        const exp = new Date(expireDateStr);
+        const today = new Date();
+        exp.setHours(0,0,0,0);
+        today.setHours(0,0,0,0);
+        
+        const diffTime = exp - today;
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays < 0) {
+            return `${dateOnly} (Expired)`;
+        } else if (diffDays === 0) {
+            return `${dateOnly} (Today)`;
+        } else if (diffDays === 1) {
+            return `${dateOnly} (1 day left)`;
+        } else {
+            return `${dateOnly} (${diffDays} days left)`;
+        }
+    }
+
     function setView(view, save = true) {
         currentView = view;
         if (save) localStorage.setItem('hy2_view', view);
@@ -187,7 +209,7 @@ lucide.createIcons();
             const used  = formatBytes(u.data_used_bytes);
             const limit = u.data_limit_gb > 0 ? `${u.data_limit_gb} GB` : '∞';
             const pct   = u.data_limit_gb > 0 ? Math.min(100, (u.data_used_bytes / (u.data_limit_gb * 1024**3)) * 100) : 0;
-            const expText = u.expire_date ? u.expire_date.split('T')[0] : 'Never';
+            const expText = formatExpireDate(u.expire_date);
             const devText = u.device_limit > 0 ? u.device_limit : '∞';
             const { label, cls } = getUserStatus(u);
             const initials = u.username.slice(0,2).toUpperCase();
@@ -261,7 +283,7 @@ lucide.createIcons();
             const used = formatBytes(u.data_used_bytes);
             const limit = u.data_limit_gb > 0 ? `${u.data_limit_gb} GB` : 'Unlimited';
             const pct   = u.data_limit_gb > 0 ? Math.min(100, (u.data_used_bytes / (u.data_limit_gb * 1024**3)) * 100) : 0;
-            const expText = u.expire_date ? u.expire_date.split('T')[0] : 'Never';
+            const expText = formatExpireDate(u.expire_date);
             const devText = u.device_limit > 0 ? u.device_limit : '∞';
             const { label: badge, cls: bclass } = getUserStatus(u);
             const online = isOnline(u.username);
