@@ -154,7 +154,7 @@ quic:
   initConnReceiveWindow: 67108864
   maxConnReceiveWindow: 67108864
   maxIdleTimeout: 120s
-  keepAlivePeriod: 5s
+  keepAlivePeriod: 3s
 
 resolver:
   type: udp

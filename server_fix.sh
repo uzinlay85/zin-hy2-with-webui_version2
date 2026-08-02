@@ -208,7 +208,7 @@ if [ -f /etc/hysteria/config.yaml ]; then
     # Upgrade QUIC timeouts for persistent connection (max 120s allowed by Hysteria 2)
     sed -i 's|300s|120s|g' /etc/hysteria/config.yaml
     sed -i -E 's|[M|m]ax[I|i]dle[T|t]imeout:.*|maxIdleTimeout: 120s|g' /etc/hysteria/config.yaml
-    sed -i -E 's|[K|k]eep[A|a]live[P|p]eriod:.*|keepAlivePeriod: 5s|g' /etc/hysteria/config.yaml
+    sed -i -E 's|[K|k]eep[A|a]live[P|p]eriod:.*|keepAlivePeriod: 3s|g' /etc/hysteria/config.yaml
     sed -i -E 's|initStreamReceiveWindow:.*|initStreamReceiveWindow: 26843545|g' /etc/hysteria/config.yaml
     sed -i -E 's|maxStreamReceiveWindow:.*|maxStreamReceiveWindow: 26843545|g' /etc/hysteria/config.yaml
     sed -i -E 's|initConnReceiveWindow:.*|initConnReceiveWindow: 67108864|g' /etc/hysteria/config.yaml
@@ -224,7 +224,7 @@ quic:
   initConnReceiveWindow: 67108864
   maxConnReceiveWindow: 67108864
   maxIdleTimeout: 120s
-  keepAlivePeriod: 5s
+  keepAlivePeriod: 3s
 
 resolver:
   type: udp
@@ -236,7 +236,7 @@ bandwidth:
   up: 1 gbps
   down: 1 gbps
 EOF_HY2_OPT
-        echo "  ✅ QUIC Keep-Alive (10s) and Cloudflare DNS added to /etc/hysteria/config.yaml"
+        echo "  ✅ QUIC Keep-Alive (3s) and Cloudflare DNS added to /etc/hysteria/config.yaml"
     else
         echo "  ✅ config.yaml already contains QUIC optimizations"
     fi

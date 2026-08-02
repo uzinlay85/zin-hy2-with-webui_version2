@@ -97,6 +97,16 @@ if [ -d "$PANEL_DIR" ]; then
     systemctl restart hy2-panel.service
     echo "✅ Web Panel updated successfully."
 
+    # ==========================================
+    # 4. Ensure QUIC keepAlivePeriod is 3s
+    # ==========================================
+    if [ -f /etc/hysteria/config.yaml ]; then
+        sed -i -E 's|keepAlivePeriod:.*|keepAlivePeriod: 3s|g' /etc/hysteria/config.yaml
+        sed -i -E 's|maxIdleTimeout:.*|maxIdleTimeout: 120s|g' /etc/hysteria/config.yaml
+        systemctl restart hysteria-server.service
+        echo "✅ QUIC keepAlivePeriod enforced at 3s (Mobile Idle Reconnect Optimization)."
+    fi
+
     # Create/update CLI command shortcut 'hy2'
     cat > /usr/local/bin/hy2 << 'EOF_HY2_CLI'
 #!/bin/bash
