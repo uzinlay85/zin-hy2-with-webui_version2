@@ -32,6 +32,9 @@ check_panel() {
     echo -e "\n${YELLOW}=== 3. Web Panel Service & Database (အခြေအနေ) ===${NC}"
     systemctl status hy2-panel --no-pager 2>/dev/null || echo -e "${RED}Web Panel Service ကို ရှာမတွေ့ပါ။${NC}"
     
+    echo -e "\n${GREEN}--- Nginx Reverse Proxy Status ---${NC}"
+    systemctl status nginx --no-pager 2>/dev/null || echo -e "${RED}Nginx Service ကို ရှာမတွေ့ပါ။${NC}"
+    
     if [ -f /opt/hy2-panel/database.db ]; then
         echo -e "\n${GREEN}=== SQLite Database Status ===${NC}"
         sqlite3 /opt/hy2-panel/database.db "SELECT count(*) FROM users WHERE role != 'admin';" 2>/dev/null | xargs -I {} echo "Total Users in DB: {}"
