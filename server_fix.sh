@@ -111,8 +111,9 @@ systemctl daemon-reload
 echo -e "\n[4/5] Updating Nginx SSL config..."
 
 if [ ! -f /etc/nginx/nginx.conf ]; then
-    echo "  ⚠️ Main Nginx config missing, reinstalling Nginx base files..."
-    apt-get update -y && apt-get install --reinstall -o Dpkg::Options::="--force-confmiss" -y nginx
+    echo "  ⚠️ Main Nginx config missing, purging and reinstalling Nginx base files..."
+    apt-get purge -y nginx nginx-common nginx-core 2>/dev/null
+    apt-get install -y nginx
 fi
 
 # Read domain from hysteria config
