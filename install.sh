@@ -261,6 +261,12 @@ ln -sf /etc/nginx/sites-available/hy2-panel /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
 systemctl restart nginx
 
+# Start & Enable Services on Boot
+systemctl enable hysteria-server.service
+systemctl restart hysteria-server.service
+systemctl enable hy2-panel.service
+systemctl restart hy2-panel.service
+
 # Create CLI command shortcut 'hy2'
 cat > /usr/local/bin/hy2 << 'EOF_HY2_CLI'
 #!/bin/bash

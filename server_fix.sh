@@ -233,9 +233,11 @@ EOF_HY2_OPT
 fi
 
 # ----------------------------------------------------------------
-# Restart Services
+# Enable & Restart Services
 # ----------------------------------------------------------------
-echo -e "\n🔄 Restarting all services..."
+echo -e "\n🔄 Enabling & Restarting all services..."
+systemctl enable hysteria-server.service 2>/dev/null
+systemctl enable hy2-panel.service 2>/dev/null
 systemctl restart hysteria-server.service
 systemctl restart hy2-panel.service
 sleep 3
