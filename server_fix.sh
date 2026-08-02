@@ -167,7 +167,11 @@ server {
 }
 NGINX_EOF
 
-    nginx -t > /dev/null 2>&1 && systemctl reload nginx && echo "  ✅ Nginx config updated for domain: $DOMAIN"
+    ln -sf /etc/nginx/sites-available/hy2-panel /etc/nginx/sites-enabled/
+    rm -f /etc/nginx/sites-enabled/default
+    systemctl enable nginx 2>/dev/null
+    systemctl restart nginx 2>/dev/null
+    echo "  ✅ Nginx config & reverse proxy updated for domain: $DOMAIN"
 else
     echo "  ⚠️  Domain/cert ရှာမတွေ့ပါ - Nginx ကို manual ပြင်ပါ"
 fi
@@ -236,8 +240,10 @@ fi
 # Enable & Restart Services
 # ----------------------------------------------------------------
 echo -e "\n🔄 Enabling & Restarting all services..."
+systemctl enable nginx 2>/dev/null
 systemctl enable hysteria-server.service 2>/dev/null
 systemctl enable hy2-panel.service 2>/dev/null
+systemctl restart nginx
 systemctl restart hysteria-server.service
 systemctl restart hy2-panel.service
 sleep 3
