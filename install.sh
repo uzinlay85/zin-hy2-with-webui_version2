@@ -175,11 +175,34 @@ fi
 git clone https://github.com/uzinlay85/zin-hy2-with-webui_version2.git /opt/hy2-panel
 cd /opt/hy2-panel
 
-# Inject generated passwords into Panel code
-sed -i "s/ADMIN_PASSWORD_PLACEHOLDER/$ADMIN_PASS/g" /opt/hy2-panel/main.py
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+
+# Seed admin password into database.db directly
+/opt/hy2-panel/venv/bin/python3 -c "
+import sqlite3, bcrypt
+db_path = '/opt/hy2-panel/database.db'
+conn = sqlite3.connect(db_path)
+c = conn.cursor()
+c.execute('''CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE,
+    password TEXT,
+    display_password TEXT,
+    data_limit_gb REAL DEFAULT 0,
+    data_used_bytes INTEGER DEFAULT 0,
+    expire_date TEXT,
+    device_limit INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT 1,
+    role TEXT DEFAULT 'user'
+)''')
+hashed = bcrypt.hashpw('''$ADMIN_PASS'''.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+c.execute(\"DELETE FROM users WHERE role='admin'\")
+c.execute(\"INSERT INTO users (username, password, role) VALUES ('admin', ?, 'admin')\", (hashed,))
+conn.commit()
+conn.close()
+"
 
 # Setup Systemd Service for Web Panel
 cat << EOF_SERVICE > /etc/systemd/system/hy2-panel.service

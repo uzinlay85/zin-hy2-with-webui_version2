@@ -83,10 +83,10 @@ def init_db():
     except Exception:
         pass
 
-    # Create default admin if not exists
+    # Create default admin if not exists (fallback to admin123)
     c.execute("SELECT * FROM users WHERE role='admin'")
     if not c.fetchone():
-        hashed_admin_pass = bcrypt.hashpw("ADMIN_PASSWORD_PLACEHOLDER".encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        hashed_admin_pass = bcrypt.hashpw("admin123".encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         c.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", 
                   ("admin", hashed_admin_pass, "admin"))
     conn.commit()

@@ -98,6 +98,27 @@ show_btop() {
     fi
 }
 
+reset_admin_pass() {
+    echo -e "\n${YELLOW}=== Web Panel Admin Password အသစ် သတ်မှတ်ခြင်း ===${NC}"
+    read -p "Admin Password အသစ် ရိုက်ထည့်ပါ: " NEW_PASS < /dev/tty
+    if [ -n "$NEW_PASS" ] && [ -f /opt/hy2-panel/database.db ]; then
+        /opt/hy2-panel/venv/bin/python3 -c "
+import sqlite3, bcrypt
+conn = sqlite3.connect('/opt/hy2-panel/database.db')
+c = conn.cursor()
+hashed = bcrypt.hashpw('''$NEW_PASS'''.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+c.execute(\"DELETE FROM users WHERE role='admin'\")
+c.execute(\"INSERT INTO users (username, password, role) VALUES ('admin', ?, 'admin')\", (hashed,))
+conn.commit()
+conn.close()
+"
+        systemctl restart hy2-panel.service
+        echo -e "\n${GREEN}✅ Admin Password ကို '$NEW_PASS' သို့ အောင်မြင်စွာ ပြောင်းလဲလိုက်ပါပြီ!${NC}\n"
+    else
+        echo -e "\n${RED}မှားယွင်းသော Password ဖြစ်ပါသည်။${NC}\n"
+    fi
+}
+
 do_update() {
     echo -e "\n${YELLOW}=== စနစ်တစ်ခုလုံးကို အလိုအလျောက် Update ပြုလုပ်နေပါသည်... ===${NC}"
     if [ -f /opt/hy2-panel/auto_update.sh ]; then
@@ -138,11 +159,12 @@ while true; do
     echo -e "${GREEN}၆)${NC} Error Logs (Hysteria & Web Panel) ကြည့်မည်"
     echo -e "${GREEN}၇)${NC} SSL Certificate သက်တမ်း စစ်မည်"
     echo -e "${GREEN}၈)${NC} Live System Resource Monitor (btop ဖြင့် CPU/RAM/Network ကြည့်မည်)"
-    echo -e "${GREEN}၉)${NC} Auto-Update System (စနစ်တစ်ခုလုံးကို အလိုအလျောက် Update ပြုလုပ်မည်)"
-    echo -e "${GREEN}၁၀)${NC} Exit (ထွက်မည်)"
+    echo -e "${GREEN}၉)${NC} Web Panel Admin Password အသစ် ပြောင်းမည်"
+    echo -e "${GREEN}၁၀)${NC} Auto-Update System (စနစ်တစ်ခုလုံးကို အလိုအလျောက် Update ပြုလုပ်မည်)"
+    echo -e "${GREEN}၁၁)${NC} Exit (ထွက်မည်)"
     echo -e "${CYAN}========================================================${NC}"
     
-    read -p "ရွေးချယ်ရန် နံပါတ်နှိပ်ပါ [1-10]: " choice < /dev/tty
+    read -p "ရွေးချယ်ရန် နံပါတ်နှိပ်ပါ [1-11]: " choice < /dev/tty
     
     case $choice in
         1) full_diagnostic ;;
@@ -153,8 +175,9 @@ while true; do
         6) check_logs ;;
         7) check_ssl ;;
         8) show_btop ;;
-        9) do_update ;;
-        10) echo -e "\n${GREEN}Bye!${NC}\n"; exit 0 ;;
+        9) reset_admin_pass ;;
+        10) do_update ;;
+        11) echo -e "\n${GREEN}Bye!${NC}\n"; exit 0 ;;
         *) echo -e "\n${RED}မှားယွင်းသော ရွေးချယ်မှုဖြစ်သည်!${NC}" ;;
     esac
 done
