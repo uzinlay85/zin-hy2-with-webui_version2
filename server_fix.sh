@@ -121,6 +121,7 @@ if [ -z "$DOMAIN" ] && [ -f /etc/hysteria/config.yaml ]; then
 fi
 
 if [ -n "$DOMAIN" ] && [ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
+    mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
     cat > /etc/nginx/sites-available/hy2-panel << NGINX_EOF
 server {
     listen 80;

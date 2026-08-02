@@ -208,6 +208,7 @@ systemctl disable hy2-api.service 2>/dev/null || true
 fuser -k 3000/tcp 2>/dev/null || true
 
 echo -e "\n[7/7] Configuring Nginx Reverse Proxy (/hy2-api/)..."
+mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
 cat << EOF_NGINX > /etc/nginx/sites-available/hy2-panel
 server {
     listen 80;
